@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Monitoring Dashboard</title>
+    <link rel="stylesheet" href="static/dashboard.css"> 
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2 class="sidebar-title">Dashboard</h2>
+            <ul class="sidebar-menu">
+                <li><a href="#">Dashboard</a></li>
+                <li><a href="/scan">Port Scan</a></li>
+                <li><a href="/trafficMonitor">Traffic Monitor</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>Traffic Monitoring Dashboard</h1>
+            </div>
+            <div class="container">
+                <h2 class="title">Real-Time Traffic Capture</h2>
+                <div id="status" class="status-message">Click "Start Capture" to begin capturing network traffic.</div>
+                <button class="btn start-capture" onclick="startCapture()">Start Capture</button>
+                <table id="packetTable" class="packet-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Protocol</th>
+                            <th>Source</th>
+                            <th>Destination</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function startCapture() {
+            const statusDiv = document.getElementById("status");
+            const packetTableBody = document.getElementById("packetTable").querySelector("tbody");
+            const loadingScreen = document.getElementById("loadingScreen");
+
+            // Show loading screen
+            loadingScreen.style.display = "flex";
+
+            // Show capturing status
+            statusDiv.innerHTML = "Capturing packets... Please wait.";
+
+            fetch("/capturePackets", { method: "GET" })
+                .then(response => response.json())
+                .then(data => {
+                    // Clear existing rows
+                    packetTableBody.innerHTML = "";
+
+                    // Update the status
+                    statusDiv.innerHTML = `Captured ${data.length} packets.`;
+
+                    // Populate the table with packet data
+                    data.forEach((packet, index) => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${packet.protocol || "N/A"}</td>
+                            <td>${packet.source || "N/A"}</td>
+                            <td>${packet.destination || "N/A"}</td>
+                            <td>${packet.details || "N/A"}</td>
+                        `;
+                        packetTableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error capturing packets:", error);
+                    statusDiv.innerHTML = "Failed to capture packets. Please check the server logs.";
+                })
+                .finally(() => {
+                    // Hide loading screen at the end 
+                    loadingScreen.style.display = "none";
+                });
+        }
+    </script>
+</body>
+</html>
