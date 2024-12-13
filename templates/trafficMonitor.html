@@ -49,50 +49,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function startCapture() {
-            const statusDiv = document.getElementById("status");
-            const packetTableBody = document.getElementById("packetTable").querySelector("tbody");
-            const loadingScreen = document.getElementById("loadingScreen");
-
-            // Show loading screen
-            loadingScreen.style.display = "flex";
-
-            // Show capturing status
-            statusDiv.innerHTML = "Capturing packets... Please wait.";
-
-            fetch("/capturePackets", { method: "GET" })
-                .then(response => response.json())
-                .then(data => {
-                    // Clear existing rows
-                    packetTableBody.innerHTML = "";
-
-                    // Update the status
-                    statusDiv.innerHTML = `Captured ${data.length} packets.`;
-
-                    // Populate the table with packet data
-                    data.forEach((packet, index) => {
-                        const row = document.createElement("tr");
-                        row.innerHTML = `
-                            <td>${index + 1}</td>
-                            <td>${packet.protocol || "N/A"}</td>
-                            <td>${packet.source || "N/A"}</td>
-                            <td>${packet.destination || "N/A"}</td>
-                            <td>${packet.details || "N/A"}</td>
-                        `;
-                        packetTableBody.appendChild(row);
-                    });
-                })
-                .catch(error => {
-                    console.error("Error capturing packets:", error);
-                    statusDiv.innerHTML = "Failed to capture packets. Please check the server logs.";
-                })
-                .finally(() => {
-                    // Hide loading screen at the end 
-                    loadingScreen.style.display = "none";
-                });
-        }
-    </script>
 </body>
 </html>
