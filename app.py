@@ -12,7 +12,7 @@ app.secret_key = 'My_secret_key'
 
 
 
-CORS(app)  # Allow cross-origin requests
+CORS(app)  # Allow cross-origin requests, code fixed
 
 
 #Initialise database for storage of scan resutls (not used, fucntionality deleted)
