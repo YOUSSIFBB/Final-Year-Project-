@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/static/dashboard.css">
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Dashboard</h2>
+        <ul>
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="/scan">Port Scan</a></li>
+            <li><a href="/trafficMonitor">traffic-Monitor</a></li>
+            <li><a href="{{ url_for('file_scan') }}">File Malware Scanner</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <h1>🛡️ File Malware Scanner</h1>
+
+        <form method="POST" enctype="multipart/form-data" class="form-card">
+            <label>Select a file to scan:</label><br>
+            <input type="file" name="file" required>
+            <button type="submit">Scan File</button>
+        </form>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert-box">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% if result %}
+            <div class="results-box">
+                <h2>Scan Results for: <strong>{{ filename }}</strong></h2>
+                <table>
+                    <tr><th>Category</th><th>Count</th></tr>
+                    <tr><td>Harmless</td><td>{{ result.harmless }}</td></tr>
+                    <tr><td>Malicious</td><td>{{ result.malicious }}</td></tr>
+                    <tr><td>Suspicious</td><td>{{ result.suspicious }}</td></tr>
+                    <tr><td>Undetected</td><td>{{ result.undetected }}</td></tr>
+                    <tr><td>Timeout</td><td>{{ result.timeout }}</td></tr>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>
