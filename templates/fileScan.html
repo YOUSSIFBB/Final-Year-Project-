@@ -2,57 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="/static/dashboard.css">
+    <title>File Malware Scanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
 
+<div class="dashboard">
+    <!-- Sidebar Navigation -->
     <div class="sidebar">
         <h2>Dashboard</h2>
         <ul>
-            <li><a href="#">Dashboard</a></li>
-            <li><a href="/scan">Port Scan</a></li>
-            <li><a href="/trafficMonitor">traffic-Monitor</a></li>
-            <li><a href="{{ url_for('file_scan') }}">File Malware Scanner</a></li>
-            <li><a href="#">Settings</a></li>
-            <li><a href="/logout">Logout</a></li>
+            <li><a href="{{ url_for('home') }}">🏠 Home</a></li>
+            <li><a href="{{ url_for('scan_page') }}">🔍 Port Scan</a></li>
+            <li><a href="{{ url_for('vscan_page') }}">📡 Traffic Monitor</a></li>
+            <li><a class="active" href="{{ url_for('file_scan') }}">🛡️ File Scanner</a></li>
+            <li><a href="{{ url_for('logout') }}">🚪 Logout</a></li>
         </ul>
     </div>
 
+    <!-- Main Content -->
     <div class="main-content">
-        <h1>🛡️ File Malware Scanner</h1>
+        <div class="header">
+            <h1>🛡️ File Malware Scanner</h1>
+        </div>
 
-        <form method="POST" enctype="multipart/form-data" class="form-card">
-            <label>Select a file to scan:</label><br>
-            <input type="file" name="file" required>
-            <button type="submit">Scan File</button>
-        </form>
+        <main>
+            <form method="POST" enctype="multipart/form-data">
+                <label for="file">Select a file to scan:</label>
+                <input type="file" name="file" id="file" required>
+                <button type="submit">Scan File</button>
+            </form>
 
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="alert-box">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-                </div>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="status-message">
+                        {% for message in messages %}
+                            <p>{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% if result %}
+                <section class="results-box">
+                    <h2>Scan Results for: <strong>{{ filename }}</strong></h2>
+                    <table class="packet-table">
+                        <tr><th>Category</th><th>Count</th></tr>
+                        <tr><td>Harmless</td><td>{{ result.harmless }}</td></tr>
+                        <tr><td>Malicious</td><td>{{ result.malicious }}</td></tr>
+                        <tr><td>Suspicious</td><td>{{ result.suspicious }}</td></tr>
+                        <tr><td>Undetected</td><td>{{ result.undetected }}</td></tr>
+                        <tr><td>Timeout</td><td>{{ result.timeout }}</td></tr>
+                    </table>
+                </section>
             {% endif %}
-        {% endwith %}
-
-        {% if result %}
-            <div class="results-box">
-                <h2>Scan Results for: <strong>{{ filename }}</strong></h2>
-                <table>
-                    <tr><th>Category</th><th>Count</th></tr>
-                    <tr><td>Harmless</td><td>{{ result.harmless }}</td></tr>
-                    <tr><td>Malicious</td><td>{{ result.malicious }}</td></tr>
-                    <tr><td>Suspicious</td><td>{{ result.suspicious }}</td></tr>
-                    <tr><td>Undetected</td><td>{{ result.undetected }}</td></tr>
-                    <tr><td>Timeout</td><td>{{ result.timeout }}</td></tr>
-                </table>
-            </div>
-        {% endif %}
+        </main>
     </div>
+</div>
 
 </body>
 </html>
