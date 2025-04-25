@@ -73,8 +73,15 @@
 
               <div id="details" class="tab-content">
                 <table class="packet-table">
+                  <tr><td><strong>File Name(s)</strong></td><td>{{ result.names | join(', ') }}</td></tr>
                   <tr><td><strong>File Size</strong></td><td>{{ result.size }} bytes</td></tr>
-                  <tr><td><strong>File Type</strong></td><td>{{ result.type }}</td></tr>
+                  <tr><td><strong>Type Description</strong></td><td>{{ result.type_description }}</td></tr>
+                  <tr><td><strong>Type Tag</strong></td><td>{{ result.type_tag }}</td></tr>
+                  <tr><td><strong>Creation Date</strong></td><td>{{ result.creation_date }}</td></tr>
+                  <tr><td><strong>Last Submission</strong></td><td>{{ result.last_submission_date }}</td></tr>
+                  <tr><td><strong>Publisher</strong></td><td>{{ result.publisher }}</td></tr>
+                  <tr><td><strong>Signature Status</strong></td><td>{{ result.signature_status }}</td></tr>
+                  <tr><td><strong>Tags</strong></td><td>{{ result.tags | join(', ') }}</td></tr>
                   <tr><td><strong>MD5</strong></td><td>{{ result.hashes.md5 }}</td></tr>
                   <tr><td><strong>SHA-1</strong></td><td>{{ result.hashes.sha1 }}</td></tr>
                   <tr><td><strong>SHA-256</strong></td><td>{{ result.hashes.sha256 }}</td></tr>

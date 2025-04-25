@@ -188,8 +188,8 @@ def file_scan():
             return redirect(request.url)
 
         scan_time = round(time.time() - start_time, 2)
-
-        stats = report_response.json()['data']['attributes']['stats']
+        file_info = report_response.json()['data']['attributes']
+        stats = file_info['stats']
         total = stats['harmless'] + stats['malicious'] + stats['suspicious'] + stats['undetected'] + stats['timeout']
         threats = stats['malicious'] + stats['suspicious']
         threat_percentage = round((threats / total) * 100, 1) if total > 0 else 0
@@ -213,10 +213,19 @@ def file_scan():
             'verdict': verdict,
             'size': os.path.getsize(file_path),
             'type': uploaded_file.content_type,
-            'hashes': get_file_hashes(file_path)
+            'hashes': get_file_hashes(file_path),
+            'names': file_info.get('names', []),
+            'type_description': file_info.get('type_description', 'Unknown'),
+            'type_tag': file_info.get('type_tag', 'Unknown'),
+            'creation_date': time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(file_info.get('creation_date', 0))),
+            'last_submission_date': time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(file_info.get('last_submission_date', 0))),
+            'publisher': file_info.get('signature_info', {}).get('publisher', 'N/A'),
+            'signature_status': file_info.get('signature_info', {}).get('signer', 'Unsigned'),
+            'tags': file_info.get('tags', [])
         }
 
     return render_template('fileScan.html', result=result, filename=filename)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

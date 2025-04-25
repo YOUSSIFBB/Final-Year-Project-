@@ -51,12 +51,72 @@
             <p>Scanning... Please wait.</p>
           </div>
 
-          <div id="scanResults">
-            <h2>Scan Results</h2>
-            <p>No results yet.</p>
+          <div id="scanResults" class="scan-output">
+            <!-- Results will be injected here via JS -->
           </div>
         </div>
       </main>
     </div>
+
+    <!--Script here-->
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("nmapScanForm");
+  const results = document.getElementById("scanResults");
+  const spinner = document.getElementById("loadingSpinner");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const target = document.getElementById("target").value || "127.0.0.1";
+
+    spinner.style.display = "flex";
+    results.innerHTML = "";
+
+    try {
+      const response = await fetch("/nmap-scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target })
+      });
+
+      const data = await response.json();
+      spinner.style.display = "none";
+
+      if (data.success) {
+        let html = `<h2>Scan Results</h2>`;
+        data.results.forEach((host, i) => {
+          html += `<h3>🔍 Host ${i + 1}: ${host.host} (${host.status})</h3>`;
+          host.protocols.forEach(proto => {
+            html += `<h4>📡 Protocol: ${proto.protocol.toUpperCase()}</h4>`;
+            html += `
+              <table class="packet-table">
+                <thead>
+                  <tr><th>Port</th><th>State</th><th>Service</th></tr>
+                </thead>
+                <tbody>
+            `;
+            proto.ports.forEach(p => {
+              html += `<tr>
+                <td>${p.port}</td>
+                <td>${p.state}</td>
+                <td>${p.service}</td>
+              </tr>`;
+            });
+            html += `</tbody></table>`;
+          });
+        });
+
+        results.innerHTML = html;
+      } else {
+        results.innerHTML = `<p class="error">Error: ${data.error}</p>`;
+      }
+    } catch (err) {
+      spinner.style.display = "none";
+      results.innerHTML = `<p class="error">Request failed: ${err.message}</p>`;
+    }
+  });
+});
+</script>
+
   </body>
 </html>
