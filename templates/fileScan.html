@@ -1,65 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>File Malware Scanner</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-
-<div class="dashboard">
-    <!-- Sidebar Navigation -->
-    <div class="sidebar">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <div class="dashboard">
+      <div class="sidebar">
         <h2>Dashboard</h2>
         <ul>
-            <li><a href="{{ url_for('home') }}">Home</a></li>
-            <li><a href="{{ url_for('scan_page') }}">Port Scan</a></li>
-            <li><a href="{{ url_for('vscan_page') }}">Traffic Monitor</a></li>
-            <li><a class="active" href="{{ url_for('file_scan') }}">File Scanner</a></li>
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+          <li><a href="{{ url_for('home') }}">Home</a></li>
+          <li><a href="{{ url_for('scan_page') }}">Port Scan</a></li>
+          <li><a href="{{ url_for('vscan_page') }}">Traffic Monitor</a></li>
+          <li><a class="active" href="{{ url_for('file_scan') }}">File Scanner</a></li>
+          <li><a href="{{ url_for('logout') }}">Logout</a></li>
         </ul>
-    </div>
+      </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
+      <div class="main-content">
         <div class="header">
-            <h1>🛡️ File Malware Scanner</h1>
+          <h1>File Malware Scanner</h1>
         </div>
 
         <main>
-            <form method="POST" enctype="multipart/form-data">
-                <label for="file">Select a file to scan:</label>
-                <input type="file" name="file" id="file" required>
-                <button type="submit">Scan File</button>
-            </form>
+          <form method="POST" enctype="multipart/form-data">
+            <label for="file">Select a file to scan:</label>
+            <input type="file" name="file" id="file" required />
+            <button type="submit">Scan File</button>
+          </form>
 
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    <div class="status-message">
-                        {% for message in messages %}
-                            <p>{{ message }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            {% endwith %}
-
-            {% if result %}
-                <section class="results-box">
-                    <h2>Scan Results for: <strong>{{ filename }}</strong></h2>
-                    <table class="packet-table">
-                        <tr><th>Category</th><th>Count</th></tr>
-                        <tr><td>Harmless</td><td>{{ result.harmless }}</td></tr>
-                        <tr><td>Malicious</td><td>{{ result.malicious }}</td></tr>
-                        <tr><td>Suspicious</td><td>{{ result.suspicious }}</td></tr>
-                        <tr><td>Undetected</td><td>{{ result.undetected }}</td></tr>
-                        <tr><td>Timeout</td><td>{{ result.timeout }}</td></tr>
-                    </table>
-                </section>
+          {% with messages=get_flashed_messages() %}
+            {% if messages %}
+              <div class="status-message">
+                {% for message in messages %}
+                  <p>{{ message }}</p>
+                {% endfor %}
+              </div>
             {% endif %}
-        </main>
-    </div>
-</div>
+          {% endwith %}
 
-</body>
+          {% if result %}
+            <section class="results-box">
+              <h2>Scan Results for: <strong>{{ filename }}</strong></h2>
+
+              <div class="tabs">
+                <button class="tab-button active" onclick="switchTab(event, 'threat')">🛡️ Threat Analysis</button>
+                <button class="tab-button" onclick="switchTab(event, 'details')">📁 File Details</button>
+              </div>
+
+              <div id="threat" class="tab-content active-tab">
+                <p><strong>Scan Time:</strong> {{ result.scan_time }} seconds</p>
+                <p><strong>Threat Level:</strong> {{ result.threat_percentage }}%</p>
+                <p><strong>Verdict:</strong> {{ result.verdict }}</p>
+
+                <table class="packet-table">
+                  <tr><th>Category</th><th>Count</th></tr>
+                  <tr><td>Harmless</td><td>{{ result.harmless }}</td></tr>
+                  <tr><td>Malicious</td><td>{{ result.malicious }}</td></tr>
+                  <tr><td>Suspicious</td><td>{{ result.suspicious }}</td></tr>
+                  <tr><td>Undetected</td><td>{{ result.undetected }}</td></tr>
+                  <tr><td>Timeout</td><td>{{ result.timeout }}</td></tr>
+                  <tr><td>Total Scans</td><td>{{ result.total }}</td></tr>
+                </table>
+              </div>
+
+              <div id="details" class="tab-content">
+                <table class="packet-table">
+                  <tr><td><strong>File Size</strong></td><td>{{ result.size }} bytes</td></tr>
+                  <tr><td><strong>File Type</strong></td><td>{{ result.type }}</td></tr>
+                  <tr><td><strong>MD5</strong></td><td>{{ result.hashes.md5 }}</td></tr>
+                  <tr><td><strong>SHA-1</strong></td><td>{{ result.hashes.sha1 }}</td></tr>
+                  <tr><td><strong>SHA-256</strong></td><td>{{ result.hashes.sha256 }}</td></tr>
+                </table>
+              </div>
+            </section>
+          {% endif %}
+        </main>
+      </div>
+    </div>
+
+    <script>
+      function switchTab(evt, tabId) {
+        const tabs = document.querySelectorAll('.tab-content');
+        const buttons = document.querySelectorAll('.tab-button');
+        tabs.forEach(t => t.classList.remove('active-tab'));
+        buttons.forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active-tab');
+        evt.currentTarget.classList.add('active');
+      }
+    </script>
+  </body>
 </html>

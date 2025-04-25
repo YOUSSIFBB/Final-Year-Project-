@@ -1,34 +1,31 @@
+Filename,Content
+app.py,"
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from models import initialize_user_db, register_user, authenticate_user
 import os
 import sqlite3
-import nmap  # Import the nmap library
+import nmap
+from flask_cors import CORS
 import requests
 import time
 import hashlib
-from flask_cors import CORS
 
 app = Flask(__name__)
 app.secret_key = 'My_secret_key'
-CORS(app)  # Allow cross-origin requests
+app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+CORS(app)
 
-# Initialize database for storage of scan results
+VT_API_KEY = ""YOUR_VIRUSTOTAL_API_KEY""
+
 initialize_user_db()
-DATABASE_PATH = os.path.join("databaseF", "scan_results.db")
+DATABASE_PATH = os.path.join(""databaseF"", ""scan_results.db"")
 if not os.path.exists(DATABASE_PATH):
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE results (id INTEGER PRIMARY KEY, target TEXT, scan_output TEXT)''')
     conn.commit()
     conn.close()
-
-# Configuration for file scanning
-VT_API_KEY = '56c33f60080c531466befc122e765ca92677231af7aae620af3e2642b4a3f936'
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024  # 25MB limit
-
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
 
 def get_file_hashes(filepath):
     hashes = {'md5': hashlib.md5(), 'sha1': hashlib.sha1(), 'sha256': hashlib.sha256()}
@@ -91,13 +88,11 @@ def vscan_page():
 def nmap_scan():
     if 'user' not in session:
         return jsonify({'success': False, 'error': 'Unauthorized. Please log in.'}), 401
-
     target = request.json.get('target', '127.0.0.1')
     nm = nmap.PortScanner()
     try:
         nm.scan(hosts=target, arguments='-sV')
         scan_results = []
-
         for host in nm.all_hosts():
             host_info = {
                 'host': host,
@@ -112,12 +107,8 @@ def nmap_scan():
                         'state': nm[host][protocol][port]['state'],
                         'service': nm[host][protocol][port]['name']
                     })
-                host_info['protocols'].append({
-                    'protocol': protocol,
-                    'ports': ports
-                })
+                host_info['protocols'].append({'protocol': protocol, 'ports': ports})
             scan_results.append(host_info)
-
         return jsonify({'success': True, 'results': scan_results})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -125,15 +116,13 @@ def nmap_scan():
 @app.route('/capturePackets', methods=['GET'])
 def capture_packets():
     from scapy.all import sniff
-
     def packet_to_dict(pkt):
         return {
-            "protocol": pkt.summary().split(" ")[0],
-            "source": pkt.src if hasattr(pkt, "src") else "Unknown",
-            "destination": pkt.dst if hasattr(pkt, "dst") else "Unknown",
-            "details": pkt.summary()
+            ""protocol"": pkt.summary().split("" "")[0],
+            ""source"": pkt.src if hasattr(pkt, ""src"") else ""Unknown"",
+            ""destination"": pkt.dst if hasattr(pkt, ""dst"") else ""Unknown"",
+            ""details"": pkt.summary()
         }
-
     packets = sniff(count=100, timeout=10)
     packet_data = [packet_to_dict(pkt) for pkt in packets]
     return jsonify(packet_data)
@@ -149,7 +138,6 @@ def file_scan():
 
     if request.method == 'POST':
         uploaded_file = request.files.get('file')
-
         if not uploaded_file:
             flash('No file uploaded!', 'error')
             return redirect(request.url)
@@ -159,7 +147,6 @@ def file_scan():
         uploaded_file.save(file_path)
 
         start_time = time.time()
-
         with open(file_path, 'rb') as f:
             upload_response = requests.post(
                 'https://www.virustotal.com/api/v3/files',
@@ -172,6 +159,7 @@ def file_scan():
             return redirect(request.url)
 
         file_id = upload_response.json()['data']['id']
+        time.sleep(15)  # Let VT process the file
 
         report_response = requests.get(
             f'https://www.virustotal.com/api/v3/analyses/{file_id}',
@@ -183,18 +171,11 @@ def file_scan():
             return redirect(request.url)
 
         scan_time = round(time.time() - start_time, 2)
-
         stats = report_response.json()['data']['attributes']['stats']
         total = stats['harmless'] + stats['malicious'] + stats['suspicious'] + stats['undetected'] + stats['timeout']
         threats = stats['malicious'] + stats['suspicious']
         threat_percentage = round((threats / total) * 100, 1) if total > 0 else 0
-
-        if threat_percentage <= 10:
-            verdict = "✅ Safe"
-        elif threat_percentage <= 40:
-            verdict = "⚠️ Caution"
-        else:
-            verdict = "🔥 Dangerous"
+        verdict = ""✅ Safe"" if threat_percentage <= 10 else ""⚠️ Caution"" if threat_percentage <= 40 else ""🔥 Dangerous""
 
         result = {
             'harmless': stats['harmless'],
@@ -215,3 +196,86 @@ def file_scan():
 
 if __name__ == '__main__':
     app.run(debug=True)
+"
+fileScan.html,"
+<!DOCTYPE html>
+<html lang=""en"">
+<head>
+    <meta charset=""UTF-8"">
+    <title>File Malware Scanner</title>
+    <link rel=""stylesheet"" href=""{{ url_for('static', filename='dashboard.css') }}"">
+    <link rel=""stylesheet"" href=""{{ url_for('static', filename='styles.css') }}"">
+</head>
+<body>
+<div class=""dashboard"">
+    <div class=""sidebar"">
+        <h2>Dashboard</h2>
+        <ul>
+            <li><a href=""{{ url_for('home') }}"">🏠 Home</a></li>
+            <li><a href=""{{ url_for('scan_page') }}"">🔍 Port Scan</a></li>
+            <li><a href=""{{ url_for('vscan_page') }}"">📡 Traffic Monitor</a></li>
+            <li><a class=""active"" href=""{{ url_for('file_scan') }}"">🛡️ File Scanner</a></li>
+            <li><a href=""{{ url_for('logout') }}"">🚪 Logout</a></li>
+        </ul>
+    </div>
+
+    <div class=""main-content"">
+        <div class=""header""><h1>🛡️ File Malware Scanner</h1></div>
+        <main>
+            <form method=""POST"" enctype=""multipart/form-data"">
+                <label for=""file"">Select a file to scan:</label>
+                <input type=""file"" name=""file"" id=""file"" required>
+                <button type=""submit"">Scan File</button>
+            </form>
+
+            {% if result %}
+            <div class=""results-box"">
+                <h2>Scan Results for: <strong>{{ filename }}</strong></h2>
+                <div class=""tabs"">
+                    <button class=""tab-button active"" onclick=""switchTab(event, 'threat')"">🛡️ Threat Analysis</button>
+                    <button class=""tab-button"" onclick=""switchTab(event, 'details')"">📁 File Details</button>
+                </div>
+
+                <div id=""threat"" class=""tab-content active-tab"">
+                    <p><strong>Scan Time:</strong> {{ result.scan_time }} seconds</p>
+                    <p><strong>Threat Level:</strong> {{ result.threat_percentage }}%</p>
+                    <p><strong>Verdict:</strong> {{ result.verdict }}</p>
+                    <table>
+                        <tr><th>Category</th><th>Count</th></tr>
+                        <tr><td>Harmless</td><td>{{ result.harmless }}</td></tr>
+                        <tr><td>Malicious</td><td>{{ result.malicious }}</td></tr>
+                        <tr><td>Suspicious</td><td>{{ result.suspicious }}</td></tr>
+                        <tr><td>Undetected</td><td>{{ result.undetected }}</td></tr>
+                        <tr><td>Timeout</td><td>{{ result.timeout }}</td></tr>
+                        <tr><td>Total Scans</td><td>{{ result.total }}</td></tr>
+                    </table>
+                </div>
+
+                <div id=""details"" class=""tab-content"">
+                    <table>
+                        <tr><td><strong>File Size</strong></td><td>{{ result.size }} bytes</td></tr>
+                        <tr><td><strong>File Type</strong></td><td>{{ result.type }}</td></tr>
+                        <tr><td><strong>MD5</strong></td><td>{{ result.hashes.md5 }}</td></tr>
+                        <tr><td><strong>SHA-1</strong></td><td>{{ result.hashes.sha1 }}</td></tr>
+                        <tr><td><strong>SHA-256</strong></td><td>{{ result.hashes.sha256 }}</td></tr>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<script>
+function switchTab(evt, tabId) {
+    const tabs = document.querySelectorAll('.tab-content');
+    const buttons = document.querySelectorAll('.tab-button');
+    tabs.forEach(t => t.classList.remove('active-tab'));
+    buttons.forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active-tab');
+    evt.currentTarget.classList.add('active');
+}
+</script>
+</body>
+</html>
+"

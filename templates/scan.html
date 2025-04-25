@@ -1,47 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nmap Network Scan</title>
-    <link rel="stylesheet" href="/static/dashboard.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/static/dashboard.css" />
+  </head>
+  <body>
     <div class="dashboard">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <h2>Menu</h2>
-            <ul>
-                <li><a href="{{ url_for('home') }}">Home</a></li>
-                <li><a href="{{ url_for('scan_page') }}">Port Scan</a></li>
-                <li><a href="{{ url_for('vscan_page') }}">Traffic Monitor</a></li>
-                <li><a class="active" href="{{ url_for('file_scan') }}">File Scanner</a></li>
-                <li><a href="{{ url_for('logout') }}">Logout</a></li>
-            </ul>
-        </nav>
-    
-        <!-- Main Content -->
-        <main class="content">
-            <h1>Nmap Network Scan</h1>
-            <div id="scanArea">
-                <form id="nmapScanForm">
-                    <label for="target">Target (Localhost by default):</label>
-                    <input type="text" id="target" name="target" placeholder="127.0.0.1">
-                    <button type="submit">Start Scan</button>
-                </form>
-    
-                <!-- Spinner -->
-                <div id="loadingSpinner" class="spinner" style="display: none;">
-                    <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
-                    <p>Scanning... Please wait.</p>
-                </div>
-    
-                <div id="scanResults">
-                    <h2>Scan Results</h2>
-                    <p>No results yet.</p>
-                </div>
+      <!-- Sidebar -->
+      <nav class="sidebar">
+        <h2>Menu</h2>
+        <ul>
+          <li>
+            <a href="{{ url_for('home') }}">Home</a>
+          </li>
+          <li>
+            <a href="{{ url_for('scan_page') }}">Port Scan</a>
+          </li>
+          <li>
+            <a href="{{ url_for('vscan_page') }}">Traffic Monitor</a>
+          </li>
+          <li>
+            <a class="active" href="{{ url_for('file_scan') }}">File Scanner</a>
+          </li>
+          <li>
+            <a href="{{ url_for('logout') }}">Logout</a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="content">
+        <h1>Nmap Network Scan</h1>
+        <div id="scanArea">
+          <form id="nmapScanForm">
+            <label for="target">Target (Localhost by default):</label>
+            <input type="text" id="target" name="target" placeholder="127.0.0.1" />
+            <button type="submit">Start Scan</button>
+          </form>
+
+          <!-- Spinner -->
+          <div id="loadingSpinner" class="spinner" style="display: none;">
+            <div class="lds-ring">
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
             </div>
-        </main>
+            <p>Scanning... Please wait.</p>
+          </div>
+
+          <div id="scanResults">
+            <h2>Scan Results</h2>
+            <p>No results yet.</p>
+          </div>
+        </div>
+      </main>
     </div>
-</body>
+  </body>
 </html>
