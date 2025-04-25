@@ -157,10 +157,47 @@ def file_scan():
 
         filename = uploaded_file.filename
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        uploaded_file.save(file_path)
+
+        # Try to save the file to disk
+        try:
+            uploaded_file.save(file_path)
+        except OSError as e:
+            if "Invalid argument" in str(e) or "cannot find the file" in str(e).lower():
+                result = {
+                    'harmless': 0,
+                    'malicious': 1,
+                    'suspicious': 0,
+                    'undetected': 0,
+                    'timeout': 0,
+                    'total': 1,
+                    'scan_time': 0,
+                    'threat_percentage': 100,
+                    'verdict': "🔥 Dangerous (blocked by antivirus)",
+                    'size': 0,
+                    'type': 'unknown',
+                    'hashes': {
+                        'md5': 'N/A',
+                        'sha1': 'N/A',
+                        'sha256': 'N/A'
+                    },
+                    'names': [filename],
+                    'type_description': 'Unavailable',
+                    'type_tag': 'blocked',
+                    'creation_date': 'Unknown',
+                    'last_submission_date': 'Unknown',
+                    'publisher': 'N/A',
+                    'signature_status': 'Unsigned',
+                    'tags': ['blocked', 'quarantined', 'simulated']
+                }
+                flash('⚠️ The file was blocked by antivirus and could not be scanned. This is a simulated result.', 'error')
+                return render_template('fileScan.html', result=result, filename=filename)
+            else:
+                flash(f"File access error: {str(e)}", "error")
+                return redirect(request.url)
 
         start_time = time.time()
 
+        # Try to upload the file to VirusTotal
         try:
             with open(file_path, 'rb') as f:
                 upload_response = requests.post(
@@ -168,9 +205,39 @@ def file_scan():
                     headers={'x-apikey': VT_API_KEY},
                     files={'file': f}
                 )
-        except OSError as e:
-            flash(f"File access error: {str(e)}. It may have been blocked or quarantined by antivirus.", "error")
-            return redirect(request.url)
+        except (OSError, IOError) as e:
+            if "Invalid argument" in str(e) or "cannot find the file" in str(e).lower():
+                result = {
+                    'harmless': 0,
+                    'malicious': 1,
+                    'suspicious': 0,
+                    'undetected': 0,
+                    'timeout': 0,
+                    'total': 1,
+                    'scan_time': 0,
+                    'threat_percentage': 100,
+                    'verdict': "🔥 Dangerous (blocked by antivirus)",
+                    'size': 0,
+                    'type': 'unknown',
+                    'hashes': {
+                        'md5': 'N/A',
+                        'sha1': 'N/A',
+                        'sha256': 'N/A'
+                    },
+                    'names': [filename],
+                    'type_description': 'Unavailable',
+                    'type_tag': 'blocked',
+                    'creation_date': 'Unknown',
+                    'last_submission_date': 'Unknown',
+                    'publisher': 'N/A',
+                    'signature_status': 'Unsigned',
+                    'tags': ['blocked', 'quarantined', 'simulated']
+                }
+                flash('⚠️ The file was blocked by antivirus and could not be uploaded. This is a simulated result.', 'error')
+                return render_template('fileScan.html', result=result, filename=filename)
+            else:
+                flash(f"Error sending file to VirusTotal: {str(e)}", "error")
+                return redirect(request.url)
 
         if upload_response.status_code != 200:
             flash('Error uploading file to VirusTotal.', 'error')
@@ -225,6 +292,7 @@ def file_scan():
         }
 
     return render_template('fileScan.html', result=result, filename=filename)
+
 
 
 if __name__ == '__main__':

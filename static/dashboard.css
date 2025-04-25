@@ -259,3 +259,37 @@ table tr:hover {
     background-color: #007bff;
     color: white;
 }
+
+/*****************Dashbaord filtering*****************/
+
+.protocol-tag {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: white;
+}
+
+.protocol-tag.arp {
+    background-color: #f39c12;
+}
+
+.protocol-tag.tcp {
+    background-color: #28a745;
+}
+
+.protocol-tag.udp {
+    background-color: #17a2b8;
+}
+
+.protocol-tag.icmp {
+    background-color: #6c757d;
+}
+
+.protocol-tag.dns {
+    background-color: #6610f2;
+}
+
+.protocol-tag.ether {
+    background-color: #007bff;
+}
