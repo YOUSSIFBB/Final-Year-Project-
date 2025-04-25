@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from models import initialize_user_db, register_user, authenticate_user
 import os
@@ -160,12 +161,16 @@ def file_scan():
 
         start_time = time.time()
 
-        with open(file_path, 'rb') as f:
-            upload_response = requests.post(
-                'https://www.virustotal.com/api/v3/files',
-                headers={'x-apikey': VT_API_KEY},
-                files={'file': f}
-            )
+        try:
+            with open(file_path, 'rb') as f:
+                upload_response = requests.post(
+                    'https://www.virustotal.com/api/v3/files',
+                    headers={'x-apikey': VT_API_KEY},
+                    files={'file': f}
+                )
+        except OSError as e:
+            flash(f"File access error: {str(e)}. It may have been blocked or quarantined by antivirus.", "error")
+            return redirect(request.url)
 
         if upload_response.status_code != 200:
             flash('Error uploading file to VirusTotal.', 'error')
