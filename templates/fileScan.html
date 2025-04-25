@@ -51,8 +51,13 @@
               </div>
 
               <div id="threat" class="tab-content active-tab">
+                <div class="circle-container">
+                  <div class="circle-chart">
+                    {{ result.threat_percentage }}%
+                    <small>Threat Score</small>
+                  </div>
+                </div>
                 <p><strong>Scan Time:</strong> {{ result.scan_time }} seconds</p>
-                <p><strong>Threat Level:</strong> {{ result.threat_percentage }}%</p>
                 <p><strong>Verdict:</strong> {{ result.verdict }}</p>
 
                 <table class="packet-table">
