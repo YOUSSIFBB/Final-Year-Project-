@@ -12,10 +12,11 @@
         <nav class="sidebar">
             <h2>Menu</h2>
             <ul>
-                <li><a href="#">Dashboard</a></li>
-                <li><a href="/scan">Port Scan</a></li>
-                <li><a href="/trafficMonitor">traffic-Monitor</a></li>
-                <li><a href="/logout">Logout</a></li>
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('scan_page') }}">Port Scan</a></li>
+                <li><a href="{{ url_for('vscan_page') }}">Traffic Monitor</a></li>
+                <li><a class="active" href="{{ url_for('file_scan') }}">File Scanner</a></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
             </ul>
         </nav>
     
