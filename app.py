@@ -172,7 +172,7 @@ def file_scan():
                     'total': 1,
                     'scan_time': 0,
                     'threat_percentage': 100,
-                    'verdict': "🔥 Dangerous (blocked by antivirus)",
+                    'verdict': "Dangerous (blocked by antivirus)",
                     'size': 0,
                     'type': 'unknown',
                     'hashes': {
@@ -189,7 +189,7 @@ def file_scan():
                     'signature_status': 'Unsigned',
                     'tags': ['blocked', 'quarantined', 'simulated']
                 }
-                flash('⚠️ The file was blocked by antivirus and could not be scanned. This is a simulated result.', 'error')
+                flash('The file was blocked by antivirus and could not be scanned. This is a simulated result.', 'error')
                 return render_template('fileScan.html', result=result, filename=filename)
             else:
                 flash(f"File access error: {str(e)}", "error")
@@ -216,7 +216,7 @@ def file_scan():
                     'total': 1,
                     'scan_time': 0,
                     'threat_percentage': 100,
-                    'verdict': "🔥 Dangerous (blocked by antivirus)",
+                    'verdict': "Dangerous (blocked by antivirus)",
                     'size': 0,
                     'type': 'unknown',
                     'hashes': {
@@ -262,11 +262,11 @@ def file_scan():
         threat_percentage = round((threats / total) * 100, 1) if total > 0 else 0
 
         if threat_percentage <= 10:
-            verdict = "✅ Safe"
+            verdict = "Safe"
         elif threat_percentage <= 40:
-            verdict = "⚠️ Caution"
+            verdict = "Caution"
         else:
-            verdict = "🔥 Dangerous"
+            verdict = "Dangerous"
 
         result = {
             'harmless': stats['harmless'],
@@ -292,6 +292,45 @@ def file_scan():
         }
 
     return render_template('fileScan.html', result=result, filename=filename)
+
+# genenrate report: 
+from flask import send_file
+from fpdf import FPDF
+import re
+
+@app.route('/download-report', methods=['POST'])
+def download_report():
+    if 'user' not in session:
+        flash('Please log in to access this feature.', 'error')
+        return redirect(url_for('login'))
+
+    result = request.form.to_dict()
+
+    # Function to clean non-latin characters
+    def clean_text(text):
+        if isinstance(text, str):
+            return re.sub(r'[^\x00-\xFF]', '', text)
+        return str(text)
+
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font('Arial', 'B', 16)
+    pdf.cell(0, 10, 'ThreatGuard - File Scan Report', ln=True, align='C')
+    pdf.ln(10)
+
+    pdf.set_font('Arial', '', 12)
+    for key, value in result.items():
+        label = key.replace('_', ' ').capitalize()
+        clean_value = clean_text(value)
+        pdf.multi_cell(0, 10, f"{label}: {clean_value}")
+
+    report_path = os.path.join(app.config['UPLOAD_FOLDER'], 'scan_report.pdf')
+    pdf.output(report_path)
+
+    # 🔥 Instead of redirect, serve the file directly
+    return send_file(report_path, as_attachment=True)
+
+
 
 
 
