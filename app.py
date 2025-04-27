@@ -297,6 +297,31 @@ def file_scan():
 from flask import send_file
 from fpdf import FPDF
 import re
+import datetime
+
+class PDF(FPDF):
+    def header(self):
+        self.set_font('Arial', 'B', 20)
+        self.cell(0, 10, 'ThreatGuard - File Scan Report', ln=True, align='C')
+        self.ln(10)
+
+    def colored_table(self, title, data):
+        # Title
+        self.set_fill_color(41, 128, 185)  # Blue header
+        self.set_text_color(255)
+        self.set_font('Arial', 'B', 14)
+        self.cell(0, 10, title, ln=True, align='L', fill=True)
+        self.ln(2)
+
+        # Data
+        self.set_text_color(0)
+        self.set_font('Arial', '', 12)
+        for key, value in data.items():
+            self.set_fill_color(220, 220, 220)  # Light grey background
+            self.cell(60, 8, key, border=1, fill=True)
+            self.cell(0, 8, str(value), border=1, ln=True)
+
+        self.ln(5)
 
 @app.route('/download-report', methods=['POST'])
 def download_report():
@@ -306,29 +331,67 @@ def download_report():
 
     result = request.form.to_dict()
 
-    # Function to clean non-latin characters
     def clean_text(text):
         if isinstance(text, str):
             return re.sub(r'[^\x00-\xFF]', '', text)
         return str(text)
 
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font('Arial', 'B', 16)
-    pdf.cell(0, 10, 'ThreatGuard - File Scan Report', ln=True, align='C')
-    pdf.ln(10)
+    # Clean all results
+    cleaned_result = {k.replace('_', ' ').capitalize(): clean_text(v) for k, v in result.items()}
 
-    pdf.set_font('Arial', '', 12)
-    for key, value in result.items():
-        label = key.replace('_', ' ').capitalize()
-        clean_value = clean_text(value)
-        pdf.multi_cell(0, 10, f"{label}: {clean_value}")
+    # Organize into sections
+    file_details = {
+        "File Size": cleaned_result.get('Size', 'N/A') + " bytes",
+        "File Type": cleaned_result.get('Type description', 'Unknown'),
+        "Publisher": cleaned_result.get('Publisher', 'N/A'),
+        "Signature": cleaned_result.get('Signature status', 'Unsigned'),
+        "MD5": cleaned_result.get('Hashes', 'N/A'),  # We'll fix formatting soon
+        "SHA-1": '',
+        "SHA-256": '',
+        "Creation Date": cleaned_result.get('Creation date', 'Unknown'),
+        "Last Submission": cleaned_result.get('Last submission date', 'Unknown')
+    }
+
+    scan_result = {
+        "Verdict": cleaned_result.get('Verdict', 'N/A'),
+        "Threat Score": cleaned_result.get('Threat percentage', '0') + "%",
+        "Harmless": cleaned_result.get('Harmless', '0'),
+        "Malicious": cleaned_result.get('Malicious', '0'),
+        "Suspicious": cleaned_result.get('Suspicious', '0'),
+        "Undetected": cleaned_result.get('Undetected', '0'),
+        "Timeout": cleaned_result.get('Timeout', '0'),
+        "Total Scans": cleaned_result.get('Total', '0'),
+        "Scan Time": cleaned_result.get('Scan time', 'N/A') + " seconds"
+    }
+
+    # Special case: if hashes dictionary, try split
+    hashes = cleaned_result.get('Hashes')
+    if hashes and isinstance(hashes, str) and "{" in hashes:
+        try:
+            import ast
+            hash_dict = ast.literal_eval(hashes)
+            file_details["MD5"] = hash_dict.get('md5', 'N/A')
+            file_details["SHA-1"] = hash_dict.get('sha1', 'N/A')
+            file_details["SHA-256"] = hash_dict.get('sha256', 'N/A')
+        except:
+            pass
+
+    # Generate PDF
+    pdf = PDF()
+    pdf.add_page()
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    pdf.set_font('Arial', 'I', 10)
+    pdf.cell(0, 10, f"Generated: {now}", ln=True, align='R')
+    pdf.ln(5)
+
+    pdf.colored_table("File Details", file_details)
+    pdf.colored_table("Scan Result", scan_result)
 
     report_path = os.path.join(app.config['UPLOAD_FOLDER'], 'scan_report.pdf')
     pdf.output(report_path)
 
-    # 🔥 Instead of redirect, serve the file directly
     return send_file(report_path, as_attachment=True)
+
 
 
 
