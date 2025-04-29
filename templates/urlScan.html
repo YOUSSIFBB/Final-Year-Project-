@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ThreatGuard - URL Scanner</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <style>
+    pre { background:#f9f9f9; padding:1rem; border-radius:5px; overflow-x:auto; }
+    .card { background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+    .card-body { padding:1.5rem; }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="sidebar">
+      <h2>Dashboard</h2>
+      <ul>
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        <li><a href="{{ url_for('scan_page') }}">Port Scan</a></li>
+        <li><a href="{{ url_for('vscan_page') }}">Traffic Monitor</a></li>
+        <li><a href="{{ url_for('file_scan') }}">File Scanner</a></li>
+        <li><a class="active" href="{{ url_for('url_scan') }}">URL Scanner</a></li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <div class="header">
+        <h1>URL Scanner</h1>
+      </div>
+
+      <main>
+        <div class="card" style="max-width:600px;margin:0 auto;">
+          <div class="card-body">
+            <form method="POST">
+              <label for="url">Enter URL to scan:</label>
+              <input type="url" name="url" id="url" placeholder="https://example.com" required
+                     style="width:100%;padding:0.5rem;margin:0.5rem 0;border-radius:5px;border:1px solid #ccc;">
+              <button type="submit" class="btn">Scan URL</button>
+            </form>
+          </div>
+        </div>
+
+        {% if verdict %}
+          <div style="text-align:center;margin-top:2rem;">
+            <h2>Verdict:</h2>
+            {% if verdict == 'Safe' %}
+              <p style="color:green;font-weight:bold;">✅ This URL appears SAFE.</p>
+            {% elif verdict == 'Malicious' %}
+              <p style="color:red;font-weight:bold;">❌ WARNING: This URL is MALICIOUS!</p>
+            {% elif verdict == 'Suspicious' %}
+              <p style="color:orange;font-weight:bold;">⚠️ This URL is SUSPICIOUS.</p>
+            {% else %}
+              <p style="color:gray;font-weight:bold;">❓ Verdict Unknown.</p>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if report %}
+          <div style="max-width:800px;margin:2rem auto;">
+            <h3>Full Analysis JSON</h3>
+            <pre>{{ report | tojson(indent=2) }}</pre>
+          </div>
+        {% endif %}
+      </main>
+    </div>
+  </div>
+</body>
+</html>

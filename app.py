@@ -8,6 +8,9 @@ import requests
 import time
 import hashlib
 from flask_cors import CORS
+import requests
+import base64
+
 
 app = Flask(__name__)
 app.secret_key = 'My_secret_key'
@@ -398,6 +401,56 @@ def download_report():
     pdf.output(report_path)
 
     return send_file(report_path, as_attachment=True)
+
+
+
+#URL scanner
+@app.route('/url-scan', methods=['GET','POST'])
+def url_scan():
+    verdict = None
+    report = None
+
+    if request.method == 'POST':
+        url_to_scan = request.form['url']
+        headers = {"x-apikey": VT_API_KEY}
+        data = {"url": url_to_scan}
+
+        # 1) Submit URL for analysis
+        post = requests.post('https://www.virustotal.com/api/v3/urls',
+                              headers=headers, data=data)
+        if post.status_code == 200:
+            scan_id = post.json()['data']['id']
+
+            # 2) Poll until status == completed
+            for _ in range(10):
+                analysis = requests.get(
+                    f'https://www.virustotal.com/api/v3/analyses/{scan_id}',
+                    headers=headers
+                ).json()
+
+                if analysis['data']['attributes']['status'] == 'completed':
+                    report = analysis
+                    break
+                time.sleep(2)
+        else:
+            flash('Failed to submit URL for scanning', 'error')
+
+        # 3) Derive a simple verdict
+        if report:
+            stats = report['data']['attributes']['stats']
+            if stats.get('malicious', 0) > 0:
+                verdict = 'Malicious'
+            elif stats.get('suspicious', 0) > 0:
+                verdict = 'Suspicious'
+            else:
+                verdict = 'Safe'
+        else:
+            verdict = 'Unknown'
+
+    return render_template('urlScan.html',
+                           verdict=verdict,
+                           report=report)
+
 
 
 
