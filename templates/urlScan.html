@@ -64,6 +64,14 @@
                     {% endfor %}
                 </table>
             </div>
+            {% if verdict == 'Safe' or verdict == 'Suspicious' %}
+                <a href="{{ url_for('viewer') }}?url={{ url_scanned }}" target="_blank" rel="noopener noreferrer">
+                    <button type="button" class="btn" style="margin-top: 1rem;">
+                    🔍 View URL in Secure Preview
+                    </button>
+                </a>
+            {% endif %}
+
             {% endif %}
         </main>
     </div>

@@ -455,6 +455,24 @@ def url_scan():
                            summary_stats=summary_stats,
                            engines=engines,
                            url_scanned=request.form.get('url', ''))
+    
+
+#sandbox
+from urllib.parse import urlparse
+
+@app.route('/viewer')
+def viewer():
+    raw_url = request.args.get('url')
+    if not raw_url:
+        return "No URL provided.", 400
+
+    # Basic safety check to prevent local file access
+    parsed = urlparse(raw_url)
+    if parsed.scheme not in ['http', 'https'] or not parsed.netloc:
+        return "Invalid URL.", 400
+
+    return render_template('viewer.html', url=raw_url)
+
 
 
 
