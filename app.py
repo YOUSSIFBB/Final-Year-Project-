@@ -44,43 +44,53 @@ def get_file_hashes(filepath):
                 h.update(chunk)
     return {k: v.hexdigest() for k, v in hashes.items()}
 
+# ----- Home Page (public) -----
 @app.route('/')
 def home():
-    if 'user' in session:
-        return render_template('index.html', user=session['user'])
-    return redirect(url_for('login'))
+    return render_template('home.html')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = authenticate_user(username, password)
-        if user:
-            session['user'] = username
-            flash('Welcome back!', 'success')
-            return redirect(url_for('home'))
-        else:
-            flash('Invalid username or password!', 'error')
-    return render_template('login.html')
 
+# ----- Register Page -----
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        # your registration logic here
         username = request.form['username']
         password = request.form['password']
-        if register_user(username, password):
-            flash('Registration successful! Please log in.', 'success')
-            return redirect(url_for('login'))
-        else:
-            flash('Username already exists!', 'error')
+        # Save user to database...
+
+        session['user'] = username
+        return redirect(url_for('dashboard'))
     return render_template('register.html')
+
+
+# ----- Login Page -----
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        # your login logic here
+        username = request.form['username']
+        password = request.form['password']
+        # Validate credentials...
+
+        session['user'] = username
+        return redirect(url_for('dashboard'))
+    return render_template('login.html')
+
+
+# ----- Dashboard (protected) -----
+@app.route('/dashboard')
+def dashboard():
+    if 'user' not in session:
+        flash('Please log in to access the dashboard.', 'error')
+        return redirect(url_for('login'))
+    return render_template('index.html', user=session['user'])
 
 @app.route('/logout')
 def logout():
     session.pop('user', None)
     flash('You have been logged out.', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('home'))
 
 @app.route('/scan')
 def scan_page():
