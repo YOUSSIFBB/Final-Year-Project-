@@ -54,28 +54,55 @@ def home():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        # your registration logic here
         username = request.form['username']
         password = request.form['password']
-        # Save user to database...
+
+        conn = sqlite3.connect('databaseF/users.db')
+        cursor = conn.cursor()
+
+        # Check if user already exists
+        cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+        existing_user = cursor.fetchone()
+
+        if existing_user:
+            flash("User already registered. Please log in.", "warning")
+            return redirect(url_for('login'))
+
+        # Otherwise, register user
+        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        conn.commit()
+        conn.close()
 
         session['user'] = username
+        flash("Registration successful! Welcome aboard.", "success")
         return redirect(url_for('dashboard'))
+
     return render_template('register.html')
+
 
 
 # ----- Login Page -----
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # your login logic here
         username = request.form['username']
         password = request.form['password']
-        # Validate credentials...
 
-        session['user'] = username
-        return redirect(url_for('dashboard'))
+        conn = sqlite3.connect('databaseF/users.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user:
+            session['user'] = username
+            flash(f"Welcome back, {username}!", "success")
+            return redirect(url_for('dashboard'))
+        else:
+            flash("Invalid credentials. Please try again.", "danger")
+
     return render_template('login.html')
+
 
 
 # ----- Dashboard (protected) -----
