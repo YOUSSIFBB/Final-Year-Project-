@@ -1,13 +1,11 @@
-# utils/dashboard_ui.py
-
 import customtkinter as ctk
 import sqlite3
 from datetime import datetime
 
-DB_PATH = "database/scan_logs.db"
+DB_PATH = "database/scan_logs.db"  # Now using the new location
 
 
-def ensure_db():
+def create_db():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute(
@@ -26,8 +24,10 @@ def ensure_db():
     conn.close()
 
 
+create_db()
+
+
 def log_scan(username, scan_type, target, result):
-    ensure_db()
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute(
@@ -35,27 +35,40 @@ def log_scan(username, scan_type, target, result):
         INSERT INTO scans (username, scan_type, target, result, timestamp)
         VALUES (?, ?, ?, ?, ?)
     """,
-        (username or "Guest", scan_type, target, result, datetime.now().isoformat()),
+        (username, scan_type, target, result, datetime.now().isoformat()),
     )
     conn.commit()
     conn.close()
 
 
-def get_scan_summary():
+def get_scan_summary(username):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT scan_type, COUNT(*) FROM scans GROUP BY scan_type")
+    cursor.execute(
+        """
+        SELECT scan_type, COUNT(*) FROM scans
+        WHERE username = ?
+        GROUP BY scan_type
+    """,
+        (username,),
+    )
     rows = cursor.fetchall()
     conn.close()
     return dict(rows)
 
 
-def get_recent_scans(limit=5):
+def get_recent_scans(username, limit=5):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT timestamp, scan_type, target, result FROM scans ORDER BY timestamp DESC LIMIT ?",
-        (limit,),
+        """
+        SELECT timestamp, scan_type, target, result
+        FROM scans
+        WHERE username = ?
+        ORDER BY timestamp DESC
+        LIMIT ?
+    """,
+        (username, limit),
     )
     rows = cursor.fetchall()
     conn.close()
@@ -63,34 +76,53 @@ def get_recent_scans(limit=5):
 
 
 def render_dashboard_ui(frame, username="Guest"):
-    ensure_db()
+    # 🧱 Create horizontal container frame
+    stats_container = ctk.CTkFrame(frame)
+    stats_container.pack(pady=20, padx=10, fill="x")
 
-    ctk.CTkLabel(frame, text=f"👋 Welcome, {username}", font=("Arial", 22)).pack(
-        pady=10
+    # 📊 Scan Summary Column (Left)
+    summary_frame = ctk.CTkFrame(stats_container, width=350)
+    summary_frame.pack(side="left", padx=10, pady=5, anchor="n")
+
+    ctk.CTkLabel(summary_frame, text="📊 Scan Summary", font=("Arial", 16)).pack(
+        pady=(5, 10)
     )
-    ctk.CTkLabel(frame, text="📊 ThreatGuard Scan Summary", font=("Arial", 16)).pack(
-        pady=5
+
+    summary = get_scan_summary(username)
+    if not summary:
+        ctk.CTkLabel(summary_frame, text="No scans found", font=("Arial", 12)).pack()
+    else:
+        for scan_type, count in summary.items():
+            ctk.CTkLabel(
+                summary_frame,
+                text=f"{scan_type} Scans: {count}",
+                font=("Arial", 14),
+                anchor="w",
+                justify="left",
+            ).pack(anchor="w", padx=10, pady=2)
+
+    # 🕒 Recent Scans Column (Right)
+    logs_frame = ctk.CTkFrame(stats_container, width=600)
+    logs_frame.pack(side="right", padx=10, pady=5, anchor="n")
+
+    ctk.CTkLabel(logs_frame, text="🕒 Recent Scans", font=("Arial", 16)).pack(
+        pady=(5, 5)
     )
 
-    summary = get_scan_summary()
-    summary_frame = ctk.CTkFrame(frame)
-    summary_frame.pack(pady=10)
+    scrollable_logs = ctk.CTkScrollableFrame(logs_frame, width=580, height=200)
+    scrollable_logs.pack(padx=5, pady=5)
 
-    for label, icon in [("File", "📁"), ("URL", "🔗"), ("Email", "📧"), ("Port", "🔌")]:
-        count = summary.get(label, 0)
-        ctk.CTkLabel(
-            summary_frame, text=f"{icon} {label} Scans: {count}", font=("Arial", 14)
-        ).pack(anchor="w", padx=20)
-
-    ctk.CTkLabel(frame, text="🕒 Recent Scans", font=("Arial", 15)).pack(pady=(20, 5))
-
-    recent_frame = ctk.CTkFrame(frame)
-    recent_frame.pack(pady=5, padx=10, fill="x")
-
-    for ts, stype, target, result in get_recent_scans():
-        ctk.CTkLabel(
-            recent_frame,
-            text=f"[{ts.split('T')[0]}] — {stype.upper()} — {target} — {result}",
-            font=("Consolas", 11),
-            anchor="w",
-        ).pack(anchor="w", padx=10, pady=2)
+    recent = get_recent_scans(username)
+    if not recent:
+        ctk.CTkLabel(scrollable_logs, text="No scans yet!", font=("Arial", 12)).pack()
+    else:
+        for timestamp, scan_type, target, result in recent:
+            entry = f"[{timestamp[:19]}] — {scan_type.upper()} — {target} — {result}"
+            ctk.CTkLabel(
+                scrollable_logs,
+                text=entry,
+                font=("Consolas", 11),
+                anchor="w",
+                justify="left",
+                wraplength=550,
+            ).pack(anchor="w", padx=10, pady=2)

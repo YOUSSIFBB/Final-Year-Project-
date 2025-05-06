@@ -9,6 +9,7 @@ from utils.port_scanner_ui import render_port_scanner_ui
 from utils.url_scanner_ui import render_url_scanner_ui
 from utils.phishing_scanner import PhishingScanner
 from utils.dashboard_ui import log_scan
+from utils.dashboard_ui import render_dashboard_ui
 import os
 import threading
 from datetime import datetime
@@ -42,13 +43,6 @@ class ThreatGuardApp(ctk.CTk):
         # Sidebar buttons
         self.add_sidebar_buttons()
 
-        # Start on dashboard
-        def load_dashboard(self):
-            self.clear_main_area()
-            from utils.dashboard_ui import render_dashboard_ui
-
-            render_dashboard_ui(self.main_area, username=self.current_user)
-
     def add_sidebar_buttons(self):
         ctk.CTkLabel(self.sidebar, text="ThreatGuard", font=("Arial", 20, "bold")).pack(
             pady=20
@@ -77,22 +71,20 @@ class ThreatGuardApp(ctk.CTk):
 
     def load_dashboard(self):
         self.clear_main_area()
-
         ctk.CTkLabel(
             self.main_area,
             text=f"👋 Welcome, {self.current_user or 'Guest'}",
             font=("Arial", 24),
-        ).pack(pady=20)
+        ).pack(pady=10)
 
         ctk.CTkLabel(
             self.main_area,
             text="ThreatGuard Security Dashboard",
             font=("Arial", 16),
-        ).pack(pady=10)
+        ).pack(pady=5)
 
-        # Quick scan buttons
         btn_frame = ctk.CTkFrame(self.main_area)
-        btn_frame.pack(pady=15)
+        btn_frame.pack(pady=10)
 
         ctk.CTkButton(btn_frame, text="📁 File Scan", command=self.load_file_scan).grid(
             row=0, column=0, padx=10, pady=5
@@ -107,11 +99,20 @@ class ThreatGuardApp(ctk.CTk):
             btn_frame, text="📶 Traffic Monitor", command=self.load_traffic_monitor
         ).grid(row=1, column=1, padx=10, pady=5)
 
-        # Theme switcher
         theme_frame = ctk.CTkFrame(self.main_area)
         theme_frame.pack(pady=10)
-
         ctk.CTkLabel(theme_frame, text="🌓 Theme Mode:").grid(row=0, column=0, padx=5)
+
+        theme_dropdown = ctk.CTkOptionMenu(
+            theme_frame,
+            values=["System", "Light", "Dark"],
+            command=ctk.set_appearance_mode,
+        )
+        theme_dropdown.set("System")
+        theme_dropdown.grid(row=0, column=1, padx=5)
+
+        # Inject scan summary and recent logs
+        render_dashboard_ui(self.main_area, username=self.current_user)
 
         def toggle_theme(choice):
             ctk.set_appearance_mode(choice)
