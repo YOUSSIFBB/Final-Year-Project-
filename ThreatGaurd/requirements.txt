@@ -7,3 +7,5 @@ scapy
 werkzeug
 tk
 python-dotenv
+fpdf
+
