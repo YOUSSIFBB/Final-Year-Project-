@@ -1,0 +1,9 @@
+customtkinter
+requests
+pytesseract
+pdf2image
+Pillow
+scapy
+werkzeug
+tk
+python-dotenv
