@@ -2,12 +2,15 @@ from scapy.all import sniff, wrpcap, TCP, UDP, ICMP
 import threading
 import time
 import os
+from utils.dashboard_ui import log_scan
 
 
 class TrafficMonitor:
-    def __init__(self, output_box, summary_label):
+
+    def __init__(self, output_box, summary_label, username="Guest"):
         self.output_box = output_box
         self.summary_label = summary_label
+        self.username = username
         self.capturing_flag = {"running": False}
         self.capture_thread = None
         self.captured_packets = []
@@ -54,6 +57,13 @@ class TrafficMonitor:
 
         self.output_box.insert("end", "🟢 Starting packet capture...\n")
         self.output_box.see("end")
+        # Add to database start time
+        log_scan(
+            username=self.username,
+            scan_type="Traffic",
+            target="LiveCapture",
+            result="Started",
+        )
         self.captured_packets.clear()
         for k in self.protocol_counts:
             self.protocol_counts[k] = 0

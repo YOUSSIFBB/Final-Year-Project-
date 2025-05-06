@@ -6,7 +6,7 @@ from PIL import Image, ImageTk
 import io
 
 
-def render_url_scanner_ui(parent_frame):
+def render_url_scanner_ui(parent_frame, username="Guest"):
     scanner = URLScanner()
 
     ctk.CTkLabel(parent_frame, text="🔗 URL Scanner", font=("Arial", 20)).pack(pady=10)
@@ -108,6 +108,13 @@ def render_url_scanner_ui(parent_frame):
         result_text.insert(
             "end",
             "\n🧪 This report is based on analysis by over 90 trusted security vendors.\n",
+        )
+
+        # Log scan to database
+        from utils.dashboard_ui import log_scan
+
+        log_scan(
+            username=username, scan_type="URL", target=url, result=verdict.split(":")[0]
         )
 
     def show_screenshot():

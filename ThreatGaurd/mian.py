@@ -8,6 +8,7 @@ from utils.traffic_monitor import TrafficMonitor
 from utils.port_scanner_ui import render_port_scanner_ui
 from utils.url_scanner_ui import render_url_scanner_ui
 from utils.phishing_scanner import PhishingScanner
+from utils.dashboard_ui import log_scan
 import os
 import threading
 from datetime import datetime
@@ -42,7 +43,11 @@ class ThreatGuardApp(ctk.CTk):
         self.add_sidebar_buttons()
 
         # Start on dashboard
-        self.load_dashboard()
+        def load_dashboard(self):
+            self.clear_main_area()
+            from utils.dashboard_ui import render_dashboard_ui
+
+            render_dashboard_ui(self.main_area, username=self.current_user)
 
     def add_sidebar_buttons(self):
         ctk.CTkLabel(self.sidebar, text="ThreatGuard", font=("Arial", 20, "bold")).pack(
@@ -298,6 +303,16 @@ class ThreatGuardApp(ctk.CTk):
                         ),
                     )
 
+                    # Log scan result in database
+                    from utils.dashboard_ui import log_scan
+
+                    log_scan(
+                        username=self.current_user,
+                        scan_type="File",
+                        target=file_path,
+                        result="Safe",
+                    )
+
             except Exception as e:
                 self.after(0, lambda: loading_label.configure(text=""))
                 self.after(
@@ -331,7 +346,7 @@ class ThreatGuardApp(ctk.CTk):
 
     def load_port_scan(self):
         self.clear_main_area()
-        render_port_scanner_ui(self.main_area)
+        render_port_scanner_ui(self.main_area, username=self.current_user)
 
     def load_traffic_monitor(self):
         self.clear_main_area()
@@ -359,7 +374,7 @@ class ThreatGuardApp(ctk.CTk):
         )
         summary_label.pack(pady=(0, 10))
 
-        monitor = TrafficMonitor(output_box, summary_label)
+        monitor = TrafficMonitor(output_box, summary_label, self.current_user)
 
         output_box.tag_config("tcp", foreground="#00BFFF")
         output_box.tag_config("udp", foreground="yellow")
@@ -390,7 +405,7 @@ class ThreatGuardApp(ctk.CTk):
         self.clear_main_area()
         from utils.url_scanner_ui import render_url_scanner_ui
 
-        render_url_scanner_ui(self.main_area)
+        render_url_scanner_ui(self.main_area, username=self.current_user)
 
     # New image scanner here
     def load_phishing_scanner(self):
@@ -414,7 +429,7 @@ class ThreatGuardApp(ctk.CTk):
 
         scanner = PhishingScanner()
 
-        def threaded_scan(file_path):
+        def threaded_scan(file_path, username):
             result, error = scanner.scan_email(file_path)
             self.after(0, lambda: loading_label.configure(text=""))
 
@@ -425,6 +440,13 @@ class ThreatGuardApp(ctk.CTk):
                 return
 
             formatted = scanner.format_result(result)
+            verdict = result.get("verdict", "Unknown")
+            log_scan(
+                username=username,
+                scan_type="Email",
+                target=file_path,
+                result=verdict.split(":")[0],
+            )
 
             def insert_colored():
                 result_text.insert("end", "\n")
@@ -483,7 +505,7 @@ class ThreatGuardApp(ctk.CTk):
             result_text.delete("1.0", "end")
             loading_label.configure(text="🔍 Scanning...")
             threading.Thread(
-                target=lambda: threaded_scan(file_path), daemon=True
+                target=lambda: threaded_scan(file_path, self.current_user), daemon=True
             ).start()
 
         ctk.CTkButton(

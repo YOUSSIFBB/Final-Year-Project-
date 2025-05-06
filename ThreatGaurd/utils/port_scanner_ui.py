@@ -2,9 +2,10 @@ import customtkinter as ctk
 import socket
 import threading
 from datetime import datetime
+from utils.dashboard_ui import log_scan
 
 
-def render_port_scanner_ui(parent_frame):
+def render_port_scanner_ui(parent_frame, username="Guest"):
     ctk.CTkLabel(parent_frame, text="Local Port Scanner", font=("Arial", 20)).pack(
         pady=10
     )
@@ -126,6 +127,13 @@ def render_port_scanner_ui(parent_frame):
         else:
             result_text.insert(
                 "end", f"\n✅ Scan complete: {len(open_ports)} open ports detected.\n"
+            )
+            # Save scan to database
+            log_scan(
+                username=username,
+                scan_type="Port",
+                target="localhost",
+                result="Scan Complete",
             )
 
     # Button Frame
