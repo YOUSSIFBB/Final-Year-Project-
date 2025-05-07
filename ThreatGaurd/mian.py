@@ -23,6 +23,19 @@ ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
 
 
+########
+def require_login(method):
+    def wrapper(self, *args, **kwargs):
+        if not self.current_user:
+            messagebox.showwarning(
+                "Login Required", "You must log in before using this feature."
+            )
+            return self.load_login_screen()
+        return method(self, *args, **kwargs)
+
+    return wrapper
+
+
 class ThreatGuardApp(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -57,6 +70,7 @@ class ThreatGuardApp(ctk.CTk):
             ("Traffic Monitor", self.load_traffic_monitor),
             ("URL Scanner", self.load_url_scanner),
             ("Email Scanner", self.load_phishing_scanner),
+            ("Logout", self.logout),
             ("Exit", self.quit),
         ]
 
@@ -69,6 +83,7 @@ class ThreatGuardApp(ctk.CTk):
         for widget in self.main_area.winfo_children():
             widget.destroy()
 
+    @require_login
     def load_dashboard(self):
         self.clear_main_area()
         ctk.CTkLabel(
@@ -196,6 +211,7 @@ class ThreatGuardApp(ctk.CTk):
             pady=10
         )
 
+    @require_login
     def load_file_scan(self):
         self.clear_main_area()
         ctk.CTkLabel(
@@ -345,10 +361,12 @@ class ThreatGuardApp(ctk.CTk):
             self.main_area, text="Select File & Scan", command=browse_and_scan
         ).pack(pady=10)
 
+    @require_login
     def load_port_scan(self):
         self.clear_main_area()
         render_port_scanner_ui(self.main_area, username=self.current_user)
 
+    @require_login
     def load_traffic_monitor(self):
         self.clear_main_area()
 
@@ -402,12 +420,14 @@ class ThreatGuardApp(ctk.CTk):
             row=0, column=3, padx=10
         )
 
+    @require_login
     def load_url_scanner(self):
         self.clear_main_area()
         from utils.url_scanner_ui import render_url_scanner_ui
 
         render_url_scanner_ui(self.main_area, username=self.current_user)
 
+    @require_login
     # New image scanner here
     def load_phishing_scanner(self):
         from tkinter import filedialog
@@ -512,6 +532,12 @@ class ThreatGuardApp(ctk.CTk):
         ctk.CTkButton(
             self.main_area, text="Select Email Image or PDF", command=scan_email_file
         ).pack(pady=15)
+
+    @require_login
+    def logout(self):
+        self.current_user = None
+        self.clear_main_area()
+        messagebox.showinfo("Logged Out", "You have been logged out.")
 
 
 if __name__ == "__main__":
