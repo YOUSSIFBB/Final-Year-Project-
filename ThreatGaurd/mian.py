@@ -94,7 +94,7 @@ class ThreatGuardApp(ctk.CTk):
 
         # Header
         ctk.CTkLabel(
-            scroll, text=f"👋 Welcome, {self.current_user}", font=("Arial", 24)
+            scroll, text=f"Welcome, {self.current_user}", font=("Arial", 24)
         ).pack(pady=10)
         ctk.CTkLabel(
             scroll, text="ThreatGuard Security Dashboard", font=("Arial", 16)
@@ -243,7 +243,7 @@ class ThreatGuardApp(ctk.CTk):
         # Tooltip content
         ctk.CTkLabel(
             tip_frame,
-            text="How to use: Select a file and click 'Scan' to check for viruses using VirusTotal.",
+            text="How to use: Select a file from your computer and click Scan. ThreatGuard will upload it to the VirusTotal API, analyse it with dozens of antivirus engines, and return a resutl e.g Safe, Malicious, or Suspicious, along with a detailed breakdown of detection counts and engine names. Use this to quickly check downloads, email attachments, or any file you don’t fully trust on your device before opening",
             font=("Arial", 12),
             text_color="white",
             anchor="w",
@@ -366,6 +366,40 @@ class ThreatGuardApp(ctk.CTk):
     @require_login
     def load_port_scan(self):
         self.clear_main_area()
+
+        # Tooltip with close button
+        tip_frame = ctk.CTkFrame(self.main_area, fg_color="#333333", corner_radius=8)
+        tip_frame.pack(pady=(0, 5), padx=10, fill="x")
+
+        # Close button (top right corner of tooltip)
+        def close_tooltip():
+            tip_frame.pack_forget()
+
+        close_btn = ctk.CTkButton(
+            tip_frame,
+            text="X",
+            width=20,
+            height=20,
+            fg_color="#444444",
+            hover_color="#555555",
+            font=("Arial", 12),
+            command=close_tooltip,
+        )
+        close_btn.place(relx=0.97, rely=0.1, anchor="ne")
+
+        # Tooltip content
+        ctk.CTkLabel(
+            tip_frame,
+            text="How to use: Click on starts scan to being the local port scan. ThreatGuard will probe the most common TCP ports on the machine and report whether each is Open or Closed. Ports are color-coded, Use this to find unexpected services running on your network.",
+            font=("Arial", 12),
+            text_color="white",
+            anchor="w",
+            justify="left",
+            wraplength=700,
+        ).pack(padx=10, pady=5)
+
+        # Optional auto-hide
+        self.after(17000, lambda: tip_frame.pack_forget())
         render_port_scanner_ui(self.main_area, username=self.current_user)
 
     @require_login
@@ -375,6 +409,40 @@ class ThreatGuardApp(ctk.CTk):
         ctk.CTkLabel(
             self.main_area, text="Live Traffic Monitor", font=("Arial", 20)
         ).pack(pady=10)
+
+        # Tooltip with close button
+        tip_frame = ctk.CTkFrame(self.main_area, fg_color="#333333", corner_radius=8)
+        tip_frame.pack(pady=(0, 5), padx=10, fill="x")
+
+        # Close button (top right corner of tooltip)
+        def close_tooltip():
+            tip_frame.pack_forget()
+
+        close_btn = ctk.CTkButton(
+            tip_frame,
+            text="X",
+            width=20,
+            height=20,
+            fg_color="#444444",
+            hover_color="#555555",
+            font=("Arial", 12),
+            command=close_tooltip,
+        )
+        close_btn.place(relx=0.97, rely=0.1, anchor="ne")
+
+        # Tooltip content
+        ctk.CTkLabel(
+            tip_frame,
+            text="How to use: Click Start Capture to begin sniffing packets on your local interface. You’ll see real-time entries for TCP, UDP, ICMP, and Other traffic in the scrolling log, plus a summary line showing packet counts by protocol. Click Stop Capture to pause, Clear to reset, or Save as PCAP to export the capture for deeper analysis in Wireshark.\n Types of packets:\n - TCP (Transmission Control Protocol) \n - UDP (User Datagram Protocol) \n - ICMP (Internet Control Message Protocol)",
+            font=("Arial", 12),
+            text_color="white",
+            anchor="w",
+            justify="left",
+            wraplength=700,
+        ).pack(padx=10, pady=5)
+
+        # Optional auto-hide
+        self.after(17000, lambda: tip_frame.pack_forget())
 
         output_box = ctk.CTkTextbox(
             self.main_area,
@@ -425,12 +493,44 @@ class ThreatGuardApp(ctk.CTk):
     @require_login
     def load_url_scanner(self):
         self.clear_main_area()
-        from utils.url_scanner_ui import render_url_scanner_ui
 
+        # Tooltip with close button
+        tip_frame = ctk.CTkFrame(self.main_area, fg_color="#333333", corner_radius=8)
+        tip_frame.pack(pady=(0, 5), padx=10, fill="x")
+
+        # Close button (top right corner of tooltip)
+        def close_tooltip():
+            tip_frame.pack_forget()
+
+        close_btn = ctk.CTkButton(
+            tip_frame,
+            text="X",
+            width=20,
+            height=20,
+            fg_color="#444444",
+            hover_color="#555555",
+            font=("Arial", 12),
+            command=close_tooltip,
+        )
+        close_btn.place(relx=0.97, rely=0.1, anchor="ne")
+
+        # Tooltip content
+        ctk.CTkLabel(
+            tip_frame,
+            text="How to use: Enter or paste a URL (e.g., https://example.com) and click Scan URL. The app will query the API for known malicious domains, you can alos fetch a live preview via the View webpage button. You’ll get a Safe, Low Risk, or High Risk result plus details like domain age, last analysis date, and screenshot. Perfect for vetting links before you click.",
+            font=("Arial", 12),
+            text_color="white",
+            anchor="w",
+            justify="left",
+            wraplength=700,
+        ).pack(padx=10, pady=5)
+
+        # Optional auto-hide
+        self.after(17000, lambda: tip_frame.pack_forget())
         render_url_scanner_ui(self.main_area, username=self.current_user)
 
     @require_login
-    # New image scanner here
+    # Email scanner
     def load_phishing_scanner(self):
         from tkinter import filedialog
 
@@ -438,6 +538,40 @@ class ThreatGuardApp(ctk.CTk):
         ctk.CTkLabel(
             self.main_area, text="📧 Email Phishing Scanner", font=("Arial", 20)
         ).pack(pady=10)
+
+        # Tooltip with close button
+        tip_frame = ctk.CTkFrame(self.main_area, fg_color="#333333", corner_radius=8)
+        tip_frame.pack(pady=(0, 5), padx=10, fill="x")
+
+        # Close button (top right corner of tooltip)
+        def close_tooltip():
+            tip_frame.pack_forget()
+
+        close_btn = ctk.CTkButton(
+            tip_frame,
+            text="X",
+            width=20,
+            height=20,
+            fg_color="#444444",
+            hover_color="#555555",
+            font=("Arial", 12),
+            command=close_tooltip,
+        )
+        close_btn.place(relx=0.97, rely=0.1, anchor="ne")
+
+        # Tooltip content
+        ctk.CTkLabel(
+            tip_frame,
+            text="How to use: Upload an email screenshot or PDF and click Scan Email. ThreatGuard uses OCR (via pytesseract) to extract the text, highlights suspicious phrases (e.g “password reset,” “urgent action required”), and flags potential phishing indicators. ",
+            font=("Arial", 12),
+            text_color="white",
+            anchor="w",
+            justify="left",
+            wraplength=700,
+        ).pack(padx=10, pady=5)
+
+        # Optional auto-hide
+        self.after(8000, lambda: tip_frame.pack_forget())
 
         result_text = ctk.CTkTextbox(
             self.main_area, width=750, height=400, font=("Consolas", 11), wrap="word"
