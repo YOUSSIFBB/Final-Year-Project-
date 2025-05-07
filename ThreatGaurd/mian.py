@@ -85,22 +85,24 @@ class ThreatGuardApp(ctk.CTk):
 
     @require_login
     def load_dashboard(self):
+        # Clear the main area
         self.clear_main_area()
-        ctk.CTkLabel(
-            self.main_area,
-            text=f"👋 Welcome, {self.current_user or 'Guest'}",
-            font=("Arial", 24),
-        ).pack(pady=10)
 
+        # Create a scrollable frame to hold the entire dashboard
+        scroll = ctk.CTkScrollableFrame(self.main_area, width=800, height=550)
+        scroll.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Header
         ctk.CTkLabel(
-            self.main_area,
-            text="ThreatGuard Security Dashboard",
-            font=("Arial", 16),
+            scroll, text=f"👋 Welcome, {self.current_user}", font=("Arial", 24)
+        ).pack(pady=10)
+        ctk.CTkLabel(
+            scroll, text="ThreatGuard Security Dashboard", font=("Arial", 16)
         ).pack(pady=5)
 
-        btn_frame = ctk.CTkFrame(self.main_area)
-        btn_frame.pack(pady=10)
-
+        # Scanner buttons container
+        btn_frame = ctk.CTkFrame(scroll, fg_color="#dddddd", corner_radius=8)
+        btn_frame.pack(pady=10, fill="x", padx=20)
         ctk.CTkButton(btn_frame, text="📁 File Scan", command=self.load_file_scan).grid(
             row=0, column=0, padx=10, pady=5
         )
@@ -114,10 +116,10 @@ class ThreatGuardApp(ctk.CTk):
             btn_frame, text="📶 Traffic Monitor", command=self.load_traffic_monitor
         ).grid(row=1, column=1, padx=10, pady=5)
 
-        theme_frame = ctk.CTkFrame(self.main_area)
+        # Theme selector
+        theme_frame = ctk.CTkFrame(scroll)
         theme_frame.pack(pady=10)
         ctk.CTkLabel(theme_frame, text="🌓 Theme Mode:").grid(row=0, column=0, padx=5)
-
         theme_dropdown = ctk.CTkOptionMenu(
             theme_frame,
             values=["System", "Light", "Dark"],
@@ -126,8 +128,8 @@ class ThreatGuardApp(ctk.CTk):
         theme_dropdown.set("System")
         theme_dropdown.grid(row=0, column=1, padx=5)
 
-        # Inject scan summary and recent logs
-        render_dashboard_ui(self.main_area, username=self.current_user)
+        # Finally, render summary, logs, and charts onto the scrollable area
+        render_dashboard_ui(scroll, username=self.current_user)
 
         def toggle_theme(choice):
             ctk.set_appearance_mode(choice)
