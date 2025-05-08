@@ -8,4 +8,4 @@ werkzeug
 tk
 python-dotenv
 fpdf
-
+matplotlib

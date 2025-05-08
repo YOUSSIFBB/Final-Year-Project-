@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import sqlite3
 from datetime import datetime
+import os
 
 # Optional: Matplotlib imports for charts
 try:
@@ -12,6 +13,10 @@ except ImportError:
     _HAVE_MATPLOTLIB = False
 
 DB_PATH = "database/scan_logs.db"
+
+################## Test database#######################
+# DB_PATH = os.getenv("TEST_DB_PATH", "database/scan_logs.db")  # Test database
+#############################################
 
 
 def create_db():
