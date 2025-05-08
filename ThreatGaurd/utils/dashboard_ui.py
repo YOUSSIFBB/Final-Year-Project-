@@ -109,9 +109,11 @@ def render_dashboard_ui(frame, username="Guest"):
         pie_canvas.draw()
         pie_canvas.get_tk_widget().pack(expand=True, fill="both")
 
-        # -- Bar Chart Card --
-        bar_card = ctk.CTkFrame(charts_frame, fg_color="white", corner_radius=6)
-        bar_card.pack(side="left", expand=True, fill="both", padx=10, pady=10)
+        # -- Line Chart Card (white theme) --
+        line_card = ctk.CTkFrame(charts_frame, fg_color="white", corner_radius=6)
+        line_card.pack(side="left", expand=True, fill="both", padx=10, pady=10)
+
+        # Build date_counts for the trend
         date_counts = {}
         for timestamp, *_ in recent:
             date = timestamp.split("T")[0]
@@ -119,16 +121,27 @@ def render_dashboard_ui(frame, username="Guest"):
         dates = list(date_counts.keys())
         counts = list(date_counts.values())
         x_pos = list(range(len(dates)))
-        bar_fig = plt.Figure(figsize=(4, 3.5))
-        bar_ax = bar_fig.add_subplot(111)
-        bar_ax.bar(x_pos, counts)
-        bar_ax.set_xticks(x_pos)
-        bar_ax.set_xticklabels(dates, rotation=45, ha="right")
-        bar_ax.set_title("Scans per Day")
-        bar_fig.tight_layout()
-        bar_canvas = FigureCanvasTkAgg(bar_fig, master=bar_card)
-        bar_canvas.draw()
-        bar_canvas.get_tk_widget().pack(expand=True, fill="both")
+
+        line_fig = plt.Figure(figsize=(4, 3.5))
+        line_ax = line_fig.add_subplot(111)
+        # Plot as a line with markers
+        line_ax.plot(x_pos, counts, marker="o", linewidth=2)
+
+        # Titles and labels
+        line_fig.suptitle("ThreatGuard Daily Scan Trend", fontsize=14, y=0.95)
+        line_ax.set_title("Scans per Day", pad=12)
+        line_ax.set_xlabel("Date", labelpad=8)
+        line_ax.set_ylabel("Number of Scans", labelpad=8)
+
+        # Ticks and grid
+        line_ax.set_xticks(x_pos)
+        line_ax.set_xticklabels(dates, rotation=45, ha="right")
+        line_ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.7)
+
+        line_fig.tight_layout(rect=[0, 0, 1, 0.9])
+        line_canvas = FigureCanvasTkAgg(line_fig, master=line_card)
+        line_canvas.draw()
+        line_canvas.get_tk_widget().pack(expand=True, fill="both")
 
     elif not _HAVE_MATPLOTLIB:
         ctk.CTkLabel(
