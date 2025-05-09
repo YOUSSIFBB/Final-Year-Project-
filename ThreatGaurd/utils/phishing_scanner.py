@@ -133,5 +133,7 @@ class PhishingScanner:
 
         lines.append("\n📄 Email Text Preview:")
         lines.append(result["preview"])
-        lines.append("\n🧪 Analysis based on OCR, regex, and optional VirusTotal scan.")
+        lines.append(
+            "\n Analysis based on OCR and regex (please note this tool provides recommendations and is not 100% accurate)"
+        )
         return "\n".join(lines)

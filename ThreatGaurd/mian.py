@@ -15,18 +15,20 @@ import threading
 from datetime import datetime
 from utils.pdf_report import export_report_to_pdf
 
+# Libaries and modules imports ^
+# logos and emojies referencesL https://emojipedia.org/en/search?q=alarm%20
 
-initialize_user_db()
+initialize_user_db()  # iniialise the daatabse
 
 # App config
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
 
 
-########
+# Decorator fucntion to enforce login before accessing application pages and features
 def require_login(method):
     def wrapper(self, *args, **kwargs):
-        if not self.current_user:
+        if not self.current_user:  # track logged-in user
             messagebox.showwarning(
                 "Login Required", "You must log in before using this feature."
             )
@@ -36,15 +38,16 @@ def require_login(method):
     return wrapper
 
 
+# Main application class
 class ThreatGuardApp(ctk.CTk):
     def __init__(self):
-        super().__init__()
+        super().__init__()  # call to parent calss constructer (customkinter)
 
-        self.title("ThreatGuard - Cybersecurity Scanner")
-        self.geometry("1000x600")
-        self.resizable(False, False)
+        self.title("ThreatGuard - Cybersecurity Scanner")  # page title
+        self.geometry("1000x600")  # page width and dimentions
+        self.resizable(False, False)  # disable window resising (bug fix)
 
-        self.current_user = None  # Track logged-in user
+        self.current_user = None  # track logged-in user
 
         # Layout
         self.sidebar = ctk.CTkFrame(self, width=200)
@@ -56,11 +59,11 @@ class ThreatGuardApp(ctk.CTk):
         # Sidebar buttons
         self.add_sidebar_buttons()
 
-    def add_sidebar_buttons(self):
+    def add_sidebar_buttons(self):  # side bar buttons method and label for UI
         ctk.CTkLabel(self.sidebar, text="ThreatGuard", font=("Arial", 20, "bold")).pack(
             pady=20
         )
-
+        # all navigation UI buttons
         buttons = [
             ("Dashboard", self.load_dashboard),
             ("Login", self.load_login_screen),
@@ -74,13 +77,15 @@ class ThreatGuardApp(ctk.CTk):
             ("Exit", self.quit),
         ]
 
+        # creation of all buttons in the array
         for text, command in buttons:
             ctk.CTkButton(self.sidebar, text=text, command=command).pack(
                 pady=5, fill="x", padx=10
             )
 
+    # method to clear all the main conenta area before renedering the new content
     def clear_main_area(self):
-        for widget in self.main_area.winfo_children():
+        for widget in self.main_area.winfo_children():  # get widgets from main area
             widget.destroy()
 
     @require_login
@@ -92,7 +97,7 @@ class ThreatGuardApp(ctk.CTk):
         scroll = ctk.CTkScrollableFrame(self.main_area, width=800, height=550)
         scroll.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # Header
+        # Dashbaord title and weclome message
         ctk.CTkLabel(
             scroll, text=f"Welcome, {self.current_user}", font=("Arial", 24)
         ).pack(pady=10)
@@ -100,7 +105,7 @@ class ThreatGuardApp(ctk.CTk):
             scroll, text="ThreatGuard Security Dashboard", font=("Arial", 16)
         ).pack(pady=5)
 
-        # Scanner buttons container
+        # Scanner buttons container, for quick access tab in the dashbaord UI
         btn_frame = ctk.CTkFrame(scroll, fg_color="#dddddd", corner_radius=8)
         btn_frame.pack(pady=10, fill="x", padx=20)
         ctk.CTkButton(btn_frame, text="📁 File Scan", command=self.load_file_scan).grid(
@@ -113,13 +118,13 @@ class ThreatGuardApp(ctk.CTk):
             row=1, column=0, padx=10, pady=5
         )
         ctk.CTkButton(
-            btn_frame, text="📶 Traffic Monitor", command=self.load_traffic_monitor
+            btn_frame, text="⛖ Traffic Monitor", command=self.load_traffic_monitor
         ).grid(row=1, column=1, padx=10, pady=5)
 
-        # Theme selector
+        # Theme selector with dropdown menu
         theme_frame = ctk.CTkFrame(scroll)
         theme_frame.pack(pady=10)
-        ctk.CTkLabel(theme_frame, text="🌓 Theme Mode:").grid(row=0, column=0, padx=5)
+        ctk.CTkLabel(theme_frame, text="💡 Theme Mode:").grid(row=0, column=0, padx=5)
         theme_dropdown = ctk.CTkOptionMenu(
             theme_frame,
             values=["System", "Light", "Dark"],
@@ -128,7 +133,7 @@ class ThreatGuardApp(ctk.CTk):
         theme_dropdown.set("System")
         theme_dropdown.grid(row=0, column=1, padx=5)
 
-        # Finally, render summary, logs, and charts onto the scrollable area
+        # render summary for current user, this incluides logs, and charts onto the scrollable area (connected to dahbaord.ui class)
         render_dashboard_ui(scroll, username=self.current_user)
 
         def toggle_theme(choice):
@@ -140,35 +145,45 @@ class ThreatGuardApp(ctk.CTk):
         theme_dropdown.set("System")
         theme_dropdown.grid(row=0, column=1, padx=5)
 
+    # Method to display Log in screen
     def load_login_screen(self):
+        # clear main area before redening content
         self.clear_main_area()
         ctk.CTkLabel(self.main_area, text="Login", font=("Arial", 20)).pack(pady=20)
 
+        # username field entries
         username_entry = ctk.CTkEntry(self.main_area, placeholder_text="Username")
         username_entry.pack(pady=10)
 
+        # passowrd field entry
         password_entry = ctk.CTkEntry(
             self.main_area, placeholder_text="Password", show="*"
         )
         password_entry.pack(pady=10)
 
+        # login method for user authentication
         def login_action():
             username = username_entry.get()
             password = password_entry.get()
             if authenticate_user(username, password):
                 self.current_user = username
-                messagebox.showinfo("Login Successful", f"Welcome, {username}!")
+                messagebox.showinfo(
+                    "Login Successful", f"Welcome, {username}!"
+                )  # display welcome message with current user logged in
                 self.load_dashboard()
             else:
-                messagebox.showerror("Error", "Invalid username or password.")
+                messagebox.showerror(
+                    "Error", "Invalid username or password."
+                )  # display this message if user authentication failed
 
         ctk.CTkButton(self.main_area, text="Login", command=login_action).pack(pady=10)
 
+    # Render regestrration screen
     def load_register_screen(self):
         self.clear_main_area()
 
         ctk.CTkLabel(self.main_area, text="Register", font=("Arial", 20)).pack(pady=20)
-
+        # regestration entry fields
         username_entry = ctk.CTkEntry(self.main_area, placeholder_text="Username")
         username_entry.pack(pady=10)
 
@@ -181,6 +196,7 @@ class ThreatGuardApp(ctk.CTk):
             username = username_entry.get()
             password = password_entry.get()
 
+            # regestration rules, incluides
             if not re.match(r"^[a-zA-Z0-9_]{4,}$", username):
                 messagebox.showerror(
                     "Invalid Username",
@@ -200,7 +216,7 @@ class ThreatGuardApp(ctk.CTk):
                     "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.",
                 )
                 return
-
+            # call the fucntion to regester new user
             if register_user(username, password):
                 messagebox.showinfo(
                     "Success", "Registration complete. You can now log in."
@@ -213,6 +229,7 @@ class ThreatGuardApp(ctk.CTk):
             pady=10
         )
 
+    # Method to call the file scanning tool / UI
     @require_login
     def load_file_scan(self):
         self.clear_main_area()
@@ -257,12 +274,15 @@ class ThreatGuardApp(ctk.CTk):
         loading_label = ctk.CTkLabel(self.main_area, text="", font=("Arial", 14))
         loading_label.pack(pady=5)
 
+        # Text boc to display resutls
+
         result_text = ctk.CTkTextbox(
             self.main_area, width=600, height=300, font=("Consolas", 12)
         )
         result_text.pack(pady=10)
         result_text.tag_config("error", foreground="red")
 
+        # inisalise the file scanner class
         scanner = FileScanner()
 
         def run_scan(file_path):
@@ -272,6 +292,8 @@ class ThreatGuardApp(ctk.CTk):
                 result, error = scanner.scan(file_path)
 
                 self.after(0, lambda: loading_label.configure(text=""))
+
+                # Schedule each fucntion to be called after a specfic time for each pass and failed scan
 
                 if error:
                     self.after(
@@ -298,11 +320,11 @@ class ThreatGuardApp(ctk.CTk):
                     self.after(
                         0,
                         lambda: result_text.insert(
-                            "end", "🧠 Summary:\nThis file appears to be safe.\n"
+                            "end", "Summary:\nThis file appears to be safe.\n"
                         ),
                     )
                     self.after(
-                        0, lambda: result_text.insert("end", "\n📊 Scan Details:\n")
+                        0, lambda: result_text.insert("end", "\n Scan Details:\n")
                     )
                     self.after(
                         0, lambda: result_text.insert("end", result)
@@ -311,7 +333,7 @@ class ThreatGuardApp(ctk.CTk):
                         0,
                         lambda: result_text.insert(
                             "end",
-                            "\n\n🧪 Results provided by trusted antivirus and cybersecurity providers.\n",
+                            "\n\n Results provided by trusted antivirus and cybersecurity providers.\n",
                         ),
                     )
                     self.after(
@@ -613,7 +635,7 @@ class ThreatGuardApp(ctk.CTk):
                     stripped = line.strip()
 
                     # Red if verdict line is suspicious or high risk
-                    if stripped.startswith("🛡️ Verdict:") and any(
+                    if stripped.startswith("Resutl:") and any(
                         symbol in stripped for symbol in ["🛑", "⚠️"]
                     ):
                         result_text.insert("end", line + "\n", "warn")
@@ -638,20 +660,6 @@ class ThreatGuardApp(ctk.CTk):
                     result_text.insert("end", line + "\n")
 
             self.after(0, insert_colored)
-
-            if result["links"]:
-
-                def copy_link():
-                    self.clipboard_clear()
-                    self.clipboard_append(result["links"][0])
-                    result_text.insert("end", "📋 Link copied to clipboard.\n", "safe")
-
-                self.after(
-                    0,
-                    lambda: ctk.CTkButton(
-                        self.main_area, text="📋 Copy Link", command=copy_link
-                    ).pack(pady=5),
-                )
 
         def scan_email_file():
             file_path = filedialog.askopenfilename(
