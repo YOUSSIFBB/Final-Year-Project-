@@ -106,15 +106,15 @@ python -m ThreatGuard.main
 * Start the capture to analyze real-time traffic.
 
 ### Phishing Detection: 
-*Go to the "Phishing Scanner" section.
-*Upload an email screenshot or PDF.
-*Detects phishing content using OCR (Optical Character Recognition).
-*Highlights suspicious phrases and links.
+* Go to the "Phishing Scanner" section.
+* Upload an email screenshot or PDF.
+* Detects phishing content using OCR (Optical Character Recognition).
+* Highlights suspicious phrases and links.
 
 ### Real-Time Traffic Monitoring:
 
-*Go to the "Traffic Monitor" section.
-*Start the capture to monitor network traffic (TCP, UDP, ICMP).
-*View packet details in real-time.
-*Save captured packets as a PCAP file.
+* Go to the "Traffic Monitor" section.
+* Start the capture to monitor network traffic (TCP, UDP, ICMP).
+* View packet details in real-time.
+* Save captured packets as a PCAP file.
 
