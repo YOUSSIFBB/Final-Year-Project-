@@ -38,7 +38,7 @@ class TestFileScanner(unittest.TestCase):
         scanner = FileScanner()
         result, error = scanner.scan("dummy_path")
 
-        self.assertIn("🛡️ Scan Result: Safe", result)
+        self.assertIn("Scan Result: Safe", result)
         self.assertIsNone(error)
 
 
