@@ -16,7 +16,7 @@ from datetime import datetime
 from utils.pdf_report import export_report_to_pdf
 
 # Libaries and modules imports ^
-# logos and emojies referencesL https://emojipedia.org/en/search?q=alarm%20
+# logos and emojies references https://emojipedia.org/en/search?q=alarm%20
 
 initialize_user_db()  # iniialise the daatabse
 
@@ -353,7 +353,7 @@ class ThreatGuardApp(ctk.CTk):
                         target=file_path,
                         result="Safe",
                     )
-
+            # Throw this when an file error or windoes virus intrrupts upload
             except Exception as e:
                 self.after(0, lambda: loading_label.configure(text=""))
                 self.after(
@@ -371,6 +371,7 @@ class ThreatGuardApp(ctk.CTk):
                     ),
                 )
 
+        # allow the user to uplaod a file
         def browse_and_scan():
             file_path = filedialog.askopenfilename()
             if not file_path:
@@ -385,6 +386,7 @@ class ThreatGuardApp(ctk.CTk):
             self.main_area, text="Select File & Scan", command=browse_and_scan
         ).pack(pady=10)
 
+    # port scanner method
     @require_login
     def load_port_scan(self):
         self.clear_main_area()
@@ -424,6 +426,7 @@ class ThreatGuardApp(ctk.CTk):
         self.after(17000, lambda: tip_frame.pack_forget())
         render_port_scanner_ui(self.main_area, username=self.current_user)
 
+    # traffic monitor
     @require_login
     def load_traffic_monitor(self):
         self.clear_main_area()
@@ -512,6 +515,7 @@ class ThreatGuardApp(ctk.CTk):
             row=0, column=3, padx=10
         )
 
+    # URL scanner
     @require_login
     def load_url_scanner(self):
         self.clear_main_area()
@@ -551,8 +555,8 @@ class ThreatGuardApp(ctk.CTk):
         self.after(17000, lambda: tip_frame.pack_forget())
         render_url_scanner_ui(self.main_area, username=self.current_user)
 
-    @require_login
     # Email scanner
+    @require_login
     def load_phishing_scanner(self):
         from tkinter import filedialog
 
@@ -677,6 +681,7 @@ class ThreatGuardApp(ctk.CTk):
             self.main_area, text="Select Email Image or PDF", command=scan_email_file
         ).pack(pady=15)
 
+    # logout fucntion here
     @require_login
     def logout(self):
         self.current_user = None

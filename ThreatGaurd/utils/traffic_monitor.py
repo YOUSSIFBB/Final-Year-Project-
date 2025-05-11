@@ -27,7 +27,7 @@ class TrafficMonitor:
             )
         )
 
-    def _process_packet(self, pkt):
+    def process_packet(self, pkt):
         if not self.capturing_flag["running"]:
             return
 
@@ -73,7 +73,7 @@ class TrafficMonitor:
 
         def sniffer():
             sniff(
-                prn=self._process_packet,
+                prn=self.process_packet,
                 store=False,
                 stop_filter=lambda x: not self.capturing_flag["running"],
             )

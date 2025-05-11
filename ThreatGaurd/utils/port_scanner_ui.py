@@ -65,7 +65,7 @@ def render_port_scanner_ui(parent_frame, username="Guest"):
     def scan_ports():
         result_text.delete("1.0", "end")
         result_text.insert(
-            "end", f"🕒 Scan started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            "end", f"Scan started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
         )
         selected_range = port_ranges[range_var.get()]
         result_text.insert(
@@ -99,7 +99,7 @@ def render_port_scanner_ui(parent_frame, username="Guest"):
 
                         open_ports.append(port)
 
-                        # Color-coded output
+                        # Colour coded output
                         if risk == "High":
                             color = "red"
                         elif risk == "Medium":

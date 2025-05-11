@@ -8,11 +8,14 @@ from datetime import datetime
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-VT_API_KEY = "your_api_key_here"  # 🔐 Replace with your VirusTotal API key
+VT_API_KEY = ""
 
 
 class PhishingScanner:
-    def __init__(self):
+
+    def __init__(
+        self,
+    ):  # Reference:https://github.com/simplerhacking/Phishing-Keyword-List
         self.keyword_patterns = [
             r"click\s+(here|this\s+link)",
             r"verify\s+(your\s+)?account",
