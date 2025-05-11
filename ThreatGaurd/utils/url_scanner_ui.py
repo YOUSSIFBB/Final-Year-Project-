@@ -36,12 +36,12 @@ def render_url_scanner_ui(parent_frame, username="Guest"):
         if not url.startswith("http://") and not url.startswith("https://"):
             result_text.insert(
                 "end",
-                "⚠ Please enter a valid URL starting with http:// or https://\n",
+                "⚠️ Please enter a valid URL starting with http:// or https://\n",
                 "warn",
             )
             return
 
-        result_text.insert("end", f"🔎 Submitting URL to VirusTotal...\n")
+        result_text.insert("end", f"Submitting URL to VirusTotal...\n")
         result_text.update()
 
         result, error = scanner.scan(url)
@@ -72,7 +72,7 @@ def render_url_scanner_ui(parent_frame, username="Guest"):
         result_text.insert("end", f"\n🔍 Scan Summary:\n")
         result_text.insert("end", f"✅ Harmless: {harmless}\n")
         result_text.insert("end", f"🚫 Malicious: {malicious}\n")
-        result_text.insert("end", f"⚠ Suspicious: {suspicious}\n")
+        result_text.insert("end", f"⚠️ Suspicious: {suspicious}\n")
         result_text.insert("end", f"❓ Undetected: {undetected}\n\n")
 
         result_text.insert("end", f"{verdict}\n\n", "verdict")
@@ -99,7 +99,7 @@ def render_url_scanner_ui(parent_frame, username="Guest"):
         result_text.tag_config("warn", foreground="red")
 
         # Full vendor breakdown
-        result_text.insert("end", "📋 Full Vendor Report:\n")
+        result_text.insert("end", "Full Vendor Report:\n")
         for vendor, details in vendors.items():
             category = details.get("category", "undetected")
             result_text.insert("end", f"  - {vendor}: {category}\n")
@@ -107,7 +107,7 @@ def render_url_scanner_ui(parent_frame, username="Guest"):
         # Info about sources
         result_text.insert(
             "end",
-            "\n🧪 This report is based on analysis by over 90 trusted security vendors.\n",
+            "\n 🌏This report is based on analysis by over 90 trusted security vendors.\n",
         )
 
         # Log scan to database
@@ -158,6 +158,6 @@ def render_url_scanner_ui(parent_frame, username="Guest"):
 
     ctk.CTkButton(
         button_frame,
-        text="📸 View Webpage Screenshot",
+        text="🌐 View Webpage Screenshot",
         command=show_screenshot,
     ).grid(row=0, column=1, padx=10)

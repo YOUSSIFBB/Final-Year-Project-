@@ -43,7 +43,7 @@ def render_port_scanner_ui(parent_frame, username="Guest"):
     progress_bar.pack(pady=5)
 
     cancel_flag = {"stop": False}
-
+    # Refrence: https://de.wikipedia.org/wiki/Liste_der_Portnummern & https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
     port_info = {
         21: ("FTP", "File Transfer Protocol", "TCP", "Medium"),
         22: ("SSH", "Secure Shell", "TCP", "Medium"),

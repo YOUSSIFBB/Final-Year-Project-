@@ -13,10 +13,21 @@ from utils.dashboard_ui import render_dashboard_ui
 import os
 import threading
 from datetime import datetime
-from utils.pdf_report import export_report_to_pdf
 
+# from utils.pdf_report import export_report_to_pdf
+
+# Authour: Youssef Alij
 # Libaries and modules imports ^
+# Code file strucutre and implelemention guide: https://docs.python-guide.org/writing/structure/
+# Application GUI https://customtkinter.tomschimansky.com/
 # logos and emojies references https://emojipedia.org/en/search?q=alarm%20
+# Port scanning Reference: https://docs.python.org/3/library/socket.html
+# File scanning Refrence: https://docs.virustotal.com/reference/overview
+# Email phising Reference: https://pypi.org/project/pytesseract/
+# Network capture Refrenence: https://app.readthedocs.org/projects/scapy/downloads/pdf/latest/
+# Testing reference: https://docs.python.org/3/library/unittest.html
+# Mock unitesting for file scanning and pacekt capturing: https://docs.python.org/3/library/unittest.mock.html & https://docs.python.org/3/library/unittest.mock-examples.html#mock-open
+# Password hashing fuctionality: https://werkzeug.palletsprojects.com/en/stable/utils/
 
 initialize_user_db()  # iniialise the daatabse
 
@@ -340,7 +351,7 @@ class ThreatGuardApp(ctk.CTk):
                         0,
                         lambda: result_text.insert(
                             "end",
-                            "🔒 No action is needed unless you were not expecting this file.\n",
+                            "No action is needed, please stay safe 🔬.\n",
                         ),
                     )
 
@@ -483,7 +494,7 @@ class ThreatGuardApp(ctk.CTk):
 
         summary_label = ctk.CTkLabel(
             self.main_area,
-            text="📊 Protocol Summary — TCP: 0 | UDP: 0 | ICMP: 0 | Other: 0",
+            text="⛖ Protocol Summary — TCP: 0 | UDP: 0 | ICMP: 0 | Other: 0",
             font=("Arial", 13),
         )
         summary_label.pack(pady=(0, 10))
@@ -657,7 +668,7 @@ class ThreatGuardApp(ctk.CTk):
                         continue
 
                     # End suspicious section once preview starts
-                    if stripped.startswith("📄 Email Text Preview:"):
+                    if stripped.startswith("📧 Email Text Content:"):
                         suspicious_section = False
 
                     # Default for all other lines
@@ -672,7 +683,7 @@ class ThreatGuardApp(ctk.CTk):
             if not file_path:
                 return
             result_text.delete("1.0", "end")
-            loading_label.configure(text="🔍 Scanning...")
+            loading_label.configure(text="⏳ Scanning...")
             threading.Thread(
                 target=lambda: threaded_scan(file_path, self.current_user), daemon=True
             ).start()

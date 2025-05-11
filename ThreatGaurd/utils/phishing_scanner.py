@@ -6,7 +6,7 @@ import re
 import requests
 from datetime import datetime
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"  # my file path, error fix from chatGBT
 
 VT_API_KEY = ""
 
@@ -113,7 +113,7 @@ class PhishingScanner:
     def format_result(self, result):
         lines = []
         lines.append(f"📅 Scan Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        lines.append(f"\n🛡️ Verdict: {result['verdict']}\n")
+        lines.append(f"\n Verdict: {result['verdict']}\n")
 
         if result["matched_patterns"]:
             lines.append("🚨 Suspicious Phrases Detected:")
@@ -129,12 +129,12 @@ class PhishingScanner:
             if result["vt_result"]:
                 vt = result["vt_result"]
                 lines.append(
-                    f"   🧪 VirusTotal — Malicious: {vt.get('malicious',0)}, Suspicious: {vt.get('suspicious',0)}, Harmless: {vt.get('harmless',0)}"
+                    f"   VirusTotal — Malicious: {vt.get('malicious',0)}, Suspicious: {vt.get('suspicious',0)}, Harmless: {vt.get('harmless',0)}"
                 )
             elif result["vt_error"]:
                 lines.append(f"   ⚠️ VT Error: {result['vt_error']}")
 
-        lines.append("\n📄 Email Text Preview:")
+        lines.append("\n✉️ Email Text Content:")
         lines.append(result["preview"])
         lines.append(
             "\n Analysis based on OCR and regex (please note this tool provides recommendations and is not 100% accurate)"

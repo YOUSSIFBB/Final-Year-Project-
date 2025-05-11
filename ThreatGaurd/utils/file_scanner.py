@@ -48,13 +48,13 @@ class FileScanner:
             threat_summary = "✅ Verified as harmless by some antivirus engines."
         else:
             threat_summary = (
-                "ℹ️ No threats reported. Most engines returned 'undetected'."
+                "🟢 No threats reported. Most engines returned 'undetected'."
             )
-
+        # Leave this like this because the indentation is effected in the UI
         result_output = f"""
-🛡️ Scan Result: {verdict}
+Scan Result: {verdict}
 
-📊 Detection Insights:
+Detection Insights:
 {threat_summary}
 
 📄 Stats Breakdown (from {total_engines} engines):
@@ -63,12 +63,12 @@ class FileScanner:
 - Suspicious:  {stats['suspicious']}
 - Undetected:  {stats['undetected']}
 
-🔍 File Hashes:
+File Hashes:
 - MD5:    {hashes['md5']}
 - SHA1:   {hashes['sha1']}
 - SHA256: {hashes['sha256']}
 
-🧪 Detected by:
+Detected by:
 {vendor_output}
 """
         return result_output, None

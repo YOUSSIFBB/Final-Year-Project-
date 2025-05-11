@@ -99,7 +99,7 @@ def render_dashboard_ui(frame, username="Guest"):
         charts_frame = ctk.CTkFrame(frame, fg_color="#f0f0f0", corner_radius=8)
         charts_frame.pack(fill="x", padx=20, pady=(10, 5))
 
-        # -- Pie Chart Card --
+        # Pie Chart
         pie_card = ctk.CTkFrame(charts_frame, fg_color="white", corner_radius=6)
         pie_card.pack(side="left", expand=True, fill="both", padx=10, pady=10)
         labels = list(summary.keys())
@@ -114,7 +114,7 @@ def render_dashboard_ui(frame, username="Guest"):
         pie_canvas.draw()
         pie_canvas.get_tk_widget().pack(expand=True, fill="both")
 
-        # -- Line Chart Card (white theme) --
+        # Line Chart Card
         line_card = ctk.CTkFrame(charts_frame, fg_color="white", corner_radius=6)
         line_card.pack(side="left", expand=True, fill="both", padx=10, pady=10)
 
@@ -155,14 +155,14 @@ def render_dashboard_ui(frame, username="Guest"):
             font=("Arial", 12, "italic"),
         ).pack(pady=10)
 
-    # === Scan Summary & Recent Logs ===
+    # Scan Summary & Recent Logs
     stats_container = ctk.CTkFrame(frame)
     stats_container.pack(pady=20, padx=10, fill="x")
 
     # Summary Column
     summary_frame = ctk.CTkFrame(stats_container, width=350)
     summary_frame.pack(side="left", padx=10, pady=5, anchor="n")
-    ctk.CTkLabel(summary_frame, text="📊 Scan Summary", font=("Arial", 16)).pack(
+    ctk.CTkLabel(summary_frame, text="Scan Summary", font=("Arial", 16)).pack(
         pady=(5, 10)
     )
     if not summary:
@@ -180,9 +180,7 @@ def render_dashboard_ui(frame, username="Guest"):
     # Recent Logs Column
     logs_frame = ctk.CTkFrame(stats_container, width=600)
     logs_frame.pack(side="right", padx=10, pady=5, anchor="n")
-    ctk.CTkLabel(logs_frame, text="🕒 Recent Scans", font=("Arial", 16)).pack(
-        pady=(5, 5)
-    )
+    ctk.CTkLabel(logs_frame, text="Recent Scans", font=("Arial", 16)).pack(pady=(5, 5))
     scrollable_logs = ctk.CTkScrollableFrame(logs_frame, width=580, height=200)
     scrollable_logs.pack(padx=5, pady=5)
     if not recent:

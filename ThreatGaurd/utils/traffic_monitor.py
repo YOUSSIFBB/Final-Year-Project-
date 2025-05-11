@@ -19,7 +19,7 @@ class TrafficMonitor:
     def _update_summary(self):
         self.summary_label.configure(
             text=(
-                f"📊 Protocol Summary — "
+                f" Protocol Summary — "
                 f"TCP: {self.protocol_counts['TCP']} | "
                 f"UDP: {self.protocol_counts['UDP']} | "
                 f"ICMP: {self.protocol_counts['ICMP']} | "
@@ -89,14 +89,16 @@ class TrafficMonitor:
 
     def save_pcap(self):
         if not self.captured_packets:
-            self.output_box.insert("end", "⚠ No packets to save.\n")
+            self.output_box.insert("end", "⚠️ No packets to save.\n")
             self.output_box.see("end")
             return
 
         self.output_box.insert("end", "💾 Saving capture to file...\n")
         self.output_box.see("end")
 
-        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        timestamp = time.strftime(
+            "%Y%m%d_%H%M%S"
+        )  # Year month- day- hour- minuites - seconds
         downloads = os.path.join(os.path.expanduser("~"), "Downloads")
         os.makedirs(downloads, exist_ok=True)
         file_path = os.path.join(downloads, f"capture_{timestamp}.pcap")

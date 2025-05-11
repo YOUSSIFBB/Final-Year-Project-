@@ -1,5 +1,7 @@
 import requests
 
+# Refrecen: https://www.thum.io/documentation/api/url
+
 
 def get_screenshot_image(url):
     """
