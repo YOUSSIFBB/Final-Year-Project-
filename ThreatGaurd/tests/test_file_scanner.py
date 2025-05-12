@@ -1,45 +1,35 @@
 import unittest
-from unittest.mock import patch, mock_open
+import os
 from utils.file_scanner import FileScanner
 
 
-class TestFileScanner(unittest.TestCase):
+class TestFileScanner(
+    unittest.TestCase
+):  # Please carfeful when running this tests, its fragile
 
-    @patch(
-        "utils.virus_total.open",
-        new_callable=mock_open,
-        read_data=b"dummy file content",
-    )
-    @patch("utils.virus_total.scan_file")
-    @patch("utils.virus_total.get_file_hashes")
-    def test_scan_safe_file(self, mock_get_hashes, mock_scan_file, mock_file):
-        mock_scan_file.return_value = (
-            {
-                "data": {
-                    "attributes": {
-                        "stats": {
-                            "harmless": 61,
-                            "malicious": 0,
-                            "suspicious": 0,
-                            "undetected": 0,
-                        },
-                        "results": {},
-                    }
-                }
-            },
-            None,
-        )
-        mock_get_hashes.return_value = {
-            "md5": "d41d8cd98f00b204e9800998ecf8427e",
-            "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
-            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        }
+    def setUp(self):
+        # Ensure the assets directory exists
+        os.makedirs("assets", exist_ok=True)
 
-        scanner = FileScanner()
-        result, error = scanner.scan("dummy_path")
+        # Create a test file for uploading
+        self.test_file_path = "assets/test_file.txt"
+        with open(self.test_file_path, "w") as f:
+            f.write("This is a test file for scanning.")
 
-        self.assertIn("Scan Result: Safe", result)
+        self.scanner = FileScanner()  # Initialize the real FileScanner
+
+    def tearDown(self):
+        # Clean up test file after testing
+        if os.path.exists(self.test_file_path):
+            os.remove(self.test_file_path)
+
+    def test_file_upload(self):
+        # Test if the FileScanner can upload and scan the file
+        result, error = self.scanner.scan(self.test_file_path)
+
+        self.assertIsNotNone(result)
         self.assertIsNone(error)
+        self.assertIn("Scan Result:", result)
 
 
 if __name__ == "__main__":

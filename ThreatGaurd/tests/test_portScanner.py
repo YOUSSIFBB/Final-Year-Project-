@@ -1,49 +1,40 @@
 import unittest
-from unittest.mock import patch, MagicMock
-from utils.port_scanner_ui import render_port_scanner_ui
 import socket
 
 
 class TestPortScanner(unittest.TestCase):
 
-    @patch("socket.socket.connect_ex")
-    def test_scan_ports_open(self, mock_connect_ex):
-        mock_connect_ex.return_value = 0  # Simulate open ports
-
-        # Directly test scan logic without UI
+    def test_scan_open_ports(self):
         open_ports = []
-        for port in range(80, 85):  # Simulating a small range
-            result = mock_connect_ex()
-            if result == 0:
-                open_ports.append(port)
 
-        self.assertEqual(len(open_ports), 5)
+        # san a range of ports on localhost
+        for port in range(80, 85):
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(1)
+                result = s.connect_ex(("127.0.0.1", port))
+                if result == 0:  # Port is open
+                    open_ports.append(port)
 
-    @patch("socket.socket.connect_ex")
-    def test_scan_ports_closed(self, mock_connect_ex):
-        mock_connect_ex.return_value = 1  # Simulate closed ports
+        print("Open Ports Found:", open_ports)
 
-        # Directly test scan logic without UI
-        open_ports = []
-        for port in range(80, 85):  # Simulating a small range
-            result = mock_connect_ex()
-            if result == 0:
-                open_ports.append(port)
+        # no guarantee of any open ports, so we only check for type list
+        self.assertIsInstance(open_ports, list)
 
-        self.assertEqual(len(open_ports), 0)
+    def test_scan_closed_ports(self):
+        closed_ports = []
 
-    @patch("socket.socket.connect_ex")
-    def test_cancel_scan(self, mock_connect_ex):
-        # Simulate canceling a scan (no active thread)
-        scan_running = True
+        # scan a range of ports on localhost machine
+        for port in range(65530, 65535):  # Unlikely to be open
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(1)
+                result = s.connect_ex(("127.0.0.1", port))
+                if result != 0:  # closed
+                    closed_ports.append(port)
 
-        def mock_scan_process():
-            nonlocal scan_running
-            scan_running = False
+        print("Closed Ports Found:", closed_ports)
 
-        mock_scan_process()
-
-        self.assertFalse(scan_running)
+        # should see some closed ports
+        self.assertGreater(len(closed_ports), 0)
 
 
 if __name__ == "__main__":

@@ -15,7 +15,7 @@ except ImportError:
 DB_PATH = "database/scan_logs.db"
 
 ################## Test database#######################
-#DB_PATH = os.getenv("TEST_DB_PATH", "database/scan_logs.db")  # Test database
+# DB_PATH = os.getenv("TEST_DB_PATH", "database/scan_logs.db")  # Test database
 #############################################
 
 

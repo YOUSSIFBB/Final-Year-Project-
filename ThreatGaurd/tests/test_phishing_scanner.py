@@ -1,54 +1,63 @@
 import unittest
-from unittest.mock import patch, MagicMock
 from utils.phishing_scanner import PhishingScanner
+from PIL import Image, ImageDraw
+import os
 
 
 class TestPhishingScanner(unittest.TestCase):
 
-    @patch("utils.phishing_scanner.PhishingScanner.extract_text")
-    @patch("utils.phishing_scanner.PhishingScanner.scan_url_with_virustotal")
-    def test_phishing_scanner_safe_email(self, mock_scan_url, mock_extract_text):
-        mock_extract_text.return_value = (
-            "This is a safe email with no suspicious content."
+    def setUp(self):
+        self.scanner = PhishingScanner()
+
+        # Ensure the assets directory exists
+        os.makedirs("assets", exist_ok=True)
+
+        # Automatically create test images with visible text
+        self.create_test_image(
+            "assets/sample_safe_email.png", "This is a safe email with no threats."
         )
-        mock_scan_url.return_value = (None, None)
-
-        scanner = PhishingScanner()
-        result, error = scanner.scan_email("dummy_file_path")
-
-        self.assertEqual(result["verdict"], "✅ Safe")
-        self.assertEqual(len(result["matched_patterns"]), 0)
-        self.assertEqual(len(result["links"]), 0)
-
-    @patch("utils.phishing_scanner.PhishingScanner.extract_text")
-    @patch("utils.phishing_scanner.PhishingScanner.scan_url_with_virustotal")
-    def test_phishing_scanner_suspicious_email(self, mock_scan_url, mock_extract_text):
-        mock_extract_text.return_value = (
-            "Urgent action required. Click here to verify your account."
+        self.create_test_image(
+            "assets/sample_suspicious_email.png", "Urgent action required. Click here."
         )
-        mock_scan_url.return_value = (None, None)
-
-        scanner = PhishingScanner()
-        result, error = scanner.scan_email("dummy_file_path")
-
-        self.assertEqual(result["verdict"], "⚠️ Suspicious: Multiple phishing signs")
-        self.assertGreater(len(result["matched_patterns"]), 1)
-
-    @patch("utils.phishing_scanner.PhishingScanner.extract_text")
-    @patch("utils.phishing_scanner.PhishingScanner.scan_url_with_virustotal")
-    def test_phishing_scanner_phishing_email(self, mock_scan_url, mock_extract_text):
-        mock_extract_text.return_value = "Your account has been suspended. Click here: http://malicious.link. Verify your account now. Urgent action required. Password reset needed."
-        mock_scan_url.return_value = (
-            {"malicious": 1, "suspicious": 0, "harmless": 0},
-            None,
+        self.create_test_image(
+            "assets/sample_phishing_email.png",
+            "Your account has been suspended. Click here to verify your account.",
         )
 
-        scanner = PhishingScanner()
-        result, error = scanner.scan_email("dummy_file_path")
+    def create_test_image(self, file_path, text):
+        if not os.path.exists(file_path):
+            img = Image.new("RGB", (500, 300), color="white")
+            d = ImageDraw.Draw(img)
+            d.text((10, 10), text, fill=(0, 0, 0))
+            img.save(file_path)
 
-        self.assertEqual(result["verdict"], "🛑 High Risk: Likely phishing")
-        self.assertGreater(len(result["matched_patterns"]), 0)
-        self.assertEqual(len(result["links"]), 1)
+    def test_phishing_scanner_safe_email(self):
+        result, error = self.scanner.scan_email("assets/sample_safe_email.png")
+
+        self.assertIsNotNone(result)
+        self.assertIsNone(error)
+        self.assertIn("✅ Safe", result["verdict"], "Expected a safe email.")
+
+    def test_phishing_scanner_suspicious_email(self):
+        result, error = self.scanner.scan_email("assets/sample_suspicious_email.png")
+
+        self.assertIsNotNone(result)
+        self.assertIsNone(error)
+        self.assertIn("⚠️ Suspicious", result["verdict"])
+
+    def test_phishing_scanner_phishing_email(self):
+        result, error = self.scanner.scan_email("assets/sample_phishing_email.png")
+
+        self.assertIsNotNone(result)
+        self.assertIsNone(error)
+        self.assertIn("🛑 High Risk", result["verdict"])
+
+    def test_phishing_scanner_invalid_file(self):
+        # Using a non-existent file path
+        result, error = self.scanner.scan_email("assets/non_existent_file.png")
+
+        self.assertIsNone(result)
+        self.assertIsNotNone(error)
 
 
 if __name__ == "__main__":
