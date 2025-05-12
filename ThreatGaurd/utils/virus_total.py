@@ -3,7 +3,7 @@ import time
 import os
 import hashlib
 
-API_KEY = "56c33f60080c531466befc122e765ca92677231af7aae620af3e2642b4a3f936"
+API_KEY = ""
 
 
 def get_file_hashes(filepath):
